@@ -1,0 +1,206 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/instrument-sans";
+@import "@fontsource-variable/dm-sans";
+@import "@fontsource-variable/jetbrains-mono";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: 'Instrument Sans Variable', sans-serif;
+    --font-sans: 'DM Sans Variable', sans-serif;
+    --font-mono: 'JetBrains Mono Variable', monospace;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+    --background: #faf8f5;
+    --foreground: #1e293b;
+    --card: #ffffff;
+    --card-foreground: #1e293b;
+    --popover: #ffffff;
+    --popover-foreground: #1e293b;
+    --primary: #2563eb;
+    --primary-foreground: #ffffff;
+    --secondary: #f3efea;
+    --secondary-foreground: #334155;
+    --muted: #f3efea;
+    --muted-foreground: #64748b;
+    --accent: #ecfdf5;
+    --accent-foreground: #065f46;
+    --destructive: #e11d48;
+    --border: #e2d9ce;
+    --input: #cbd5e1;
+    --ring: #2563eb;
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --radius: 0.625rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    min-width: 320px;
+    background-image: radial-gradient(circle at 15% 0%, rgba(37, 99, 235, 0.06), transparent 24rem);
+    }
+  html {
+    @apply font-sans;
+    }
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-rise-in { animation: rise-in 420ms ease-out both; }
+
+/* LearnLens theme overrides. Theme selection is persisted locally per browser. */
+html.theme-dark { color-scheme: dark; }
+html.theme-dark body { background-color: #0f172a !important; color: #e2e8f0 !important; background-image: radial-gradient(circle at 15% 0%, rgba(59, 130, 246, 0.10), transparent 24rem) !important; }
+html.theme-dark [class*="bg-[#FAF8F5]"],
+html.theme-dark [class*="bg-[#F3EFEA]"],
+html.theme-dark [class*="bg-white"] { background-color: #172033 !important; }
+html.theme-dark [class*="text-slate-900"] { color: #f8fafc !important; }
+html.theme-dark [class*="text-slate-800"] { color: #e2e8f0 !important; }
+html.theme-dark [class*="text-slate-700"] { color: #cbd5e1 !important; }
+html.theme-dark [class*="text-slate-600"] { color: #94a3b8 !important; }
+html.theme-dark [class*="text-slate-500"] { color: #94a3b8 !important; }
+html.theme-dark [class*="text-slate-400"] { color: #64748b !important; }
+html.theme-dark [class*="border-[#E2D9CE]"] { border-color: #334155 !important; }
+html.theme-dark [class*="border-[#CBD5E1]"] { border-color: #475569 !important; }
+html.theme-dark input, html.theme-dark textarea, html.theme-dark select { background-color: #111827 !important; color: #e2e8f0 !important; border-color: #475569 !important; }
+html.theme-dark [class*="bg-slate-50"] { background-color: #1e293b !important; }
+html.theme-dark [class*="bg-slate-100"] { background-color: #334155 !important; }
+html.theme-dark [class*="hover:bg-slate-50"]:hover { background-color: #1e293b !important; }
+
+
+/* Premium LearnLens geometric atmosphere — decorative only, never interactive. */
+.login-geometry-layer { z-index: 0; }
+.login-geometry-layer + div { position: relative; z-index: 1; }
+.login-geo { position: absolute; display: block; transform-origin: center; will-change: transform; }
+.login-geo-diamond {
+  width: 180px; height: 180px; right: 7%; top: 9%;
+  border: 1px solid rgba(37,99,235,.16); background: linear-gradient(135deg, rgba(59,130,246,.07), rgba(99,102,241,.02));
+  transform: rotate(45deg); border-radius: 28px; animation: login-float-a 12s ease-in-out infinite;
+}
+.login-geo-square {
+  width: 92px; height: 92px; border-radius: 22px;
+  border: 1px solid rgba(14,165,233,.16); background: rgba(14,165,233,.035);
+}
+.login-geo-square-a { left: 5%; top: 24%; transform: rotate(14deg); animation: login-float-b 15s ease-in-out infinite; }
+.login-geo-square-b { right: 28%; bottom: 10%; width: 62px; height: 62px; transform: rotate(-18deg); border-color: rgba(99,102,241,.14); }
+.login-geo-triangle {
+  width: 0; height: 0; right: 14%; bottom: 19%;
+  border-left: 76px solid transparent; border-right: 76px solid transparent; border-bottom: 128px solid rgba(37,99,235,.055);
+  filter: drop-shadow(0 16px 35px rgba(37,99,235,.06)); animation: login-float-c 18s ease-in-out infinite;
+}
+.login-geo-ring {
+  width: 210px; height: 210px; left: -78px; bottom: 4%;
+  border: 1px solid rgba(99,102,241,.11); border-radius: 999px;
+}
+.login-geo-line { width: 240px; height: 1px; background: linear-gradient(90deg, transparent, rgba(37,99,235,.16), transparent); }
+.login-geo-line-a { left: 17%; top: 13%; transform: rotate(-25deg); }
+.login-geo-line-b { right: 3%; top: 47%; transform: rotate(68deg); opacity: .55; }
+.login-geo-dot { width: 7px; height: 7px; border-radius: 999px; background: rgba(37,99,235,.22); box-shadow: 0 0 0 8px rgba(37,99,235,.035); }
+.login-geo-dot-a { left: 15%; top: 67%; }
+.login-geo-dot-b { right: 17%; top: 29%; background: rgba(99,102,241,.2); }
+@keyframes login-float-a { 0%,100% { margin-top: 0; } 50% { margin-top: 14px; } }
+@keyframes login-float-b { 0%,100% { margin-top: 0; } 50% { margin-top: -10px; } }
+@keyframes login-float-c { 0%,100% { margin-bottom: 0; } 50% { margin-bottom: 12px; } }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .login-geo { animation: none !important; }
+}
+@media (max-width: 1023px) {
+  .login-geo-diamond { width: 130px; height: 130px; right: -40px; top: 5%; }
+  .login-geo-ring { width: 150px; height: 150px; left: -75px; bottom: 8%; }
+  .login-geo-triangle { right: -20px; bottom: 12%; transform: scale(.72); }
+}

@@ -1,0 +1,24 @@
+{
+  "summary": "Verification-only run for the reported 'Cross-origin request blocked' admin bug. Opened the public preview URL in a real browser, clicked Admin → Send verification code exactly once, then submitted 000000 exactly once. Bug is FIXED.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "N/A — no login required for admin request-verification button test.",
+  "seed_data_creation": "None. One real admin verification code email was sent as approved in the request.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "CORS_ORIGINS in /app/backend/.env now includes both the preview.emergentagent.com and cluster-12.preview.emergentcf.cloud hosts. server.py has no CORS-DEBUG debug print (confirmed grep count=0). Admin request-verification is rate-limited 3/15min and verify 6/10min per client host — reuse the previously captured cookie/code path sparingly.",
+  "verification_evidence": {
+    "primary_click_result": "POST /api/auth/admin/request-verification returned 200 (captured via page.on('response')); no red 'Cross-origin request blocked' banner; error text was empty string after click.",
+    "ui_advance": "data-testid=admin-code-input rendered and became visible immediately after the single click.",
+    "optional_wrong_code": "Submitting 000000 once returned 401 and the UI displayed 'Incorrect verification code' — confirms verify endpoint is also reachable cross-origin.",
+    "backend_access_log": "Latest entries for the browser request show 'POST /api/auth/admin/request-verification HTTP/1.1 200 OK' followed by 'POST /api/auth/admin/verify HTTP/1.1 401 Unauthorized'. All older 403 entries pre-date the CORS_ORIGINS fix.",
+    "server_py_clean": "grep -c 'CORS-DEBUG' /app/backend/server.py = 0 (no debug prints present).",
+    "cors_origins_env": "CORS_ORIGINS contains https://c4415e13-85b5-41ac-9271-7c10262216c6.preview.emergentagent.com and https://c4415e13-85b5-41ac-9271-7c10262216c6.cluster-12.preview.emergentcf.cloud (plus localhost variants)."
+  },
+  "rca of the issue": "Browser Origin header at the Emergent preview URL is the cluster-12.preview.emergentcf.cloud host (the internal host the public preview URL is mapped to). Before the fix, CORS_ORIGINS in backend/.env only listed the public preview host, so the security middleware's origin check rejected same-domain-different-host browser POSTs with 403 (surfaced in the UI as 'Cross-origin request blocked'). Configuration-only fix: added the cluster-12 host to CORS_ORIGINS. Verified end-to-end in browser: 200 on request-verification, 401 on wrong-code verify, no 403, no CORS banner."
+}

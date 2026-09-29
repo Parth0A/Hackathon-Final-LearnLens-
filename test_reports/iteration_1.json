@@ -1,0 +1,124 @@
+{
+  "iteration": 1,
+  "passed": 16,
+  "failed": 0,
+  "bugs": [],
+  "action_items": [
+    "Backend pytest.ini pins -n 2 --dist loadscope, but the app has a single shared demo-student singleton with no per-request isolation endpoint. Under loadscope, different test MODULES can still be scheduled to different xdist workers and race on the shared demo-student row (observed DuplicateKeyError / 409s during triage). Mitigation applied: all demo-student-touching test files carry `pytestmark = pytest.mark.xdist_group(name=\"demo_student\")`, but loadscope ignores xdist_group (that only takes effect under --dist loadgroup). Run the suite with `-n 0` (documented as the supported serial override) for guaranteed-correct results; this is what was used to certify all 16 tests above. If CI runs the bare configured addopts (-n 2 --dist loadscope) without -n 0, occasional flakiness from cross-module demo-student races is possible and is an environment/config note, not an application bug."
+  ],
+  "retest_needed": false,
+  "checks": [
+    {
+      "criterion": "Demo reset restores the controlled initial state",
+      "name": "test_tscheck_demo_reset.py",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "POST /api/demo/reset -> 200 {student.id=demo-student, initial_mastery.lifo=0.42, initial_mastery.stack=0.45}; GET /api/learning-state/demo-student confirms lifo=0.42 (in_recovery), stack=0.45; GET /api/gaps/demo-student -> []; GET /api/dashboard/demo-student -> active_gaps=0, current_gap=null"
+    },
+    {
+      "criterion": "Demo reset restores the controlled initial state",
+      "name": "demo-reset-restores-dashboard",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "After seeding a gap via assessment API, dashboard shows rose 'learning gap' banner + active-gaps=1; clicking Reset Demo restores 'ready to run' banner, active-gaps=0, recovered-concepts=0, concept-mastery-row-lifo=42%, current-focus badge=42%, and API learning-state confirms stack mastery=0.45"
+    },
+    {
+      "criterion": "Assessment stores question-level evidence and detects the root gap",
+      "name": "test_tscheck_assessment_evidence.py",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "POST /api/assessment/start -> 10 questions; POST /api/assessment/submit with first-option answers -> 200 {attempts_saved:10, detected_gap.root_gap:lifo, detected_gap.concept_id:stack, confidence>0}; GET /api/learning-state/demo-student confirms stored attempts; invalid student -> 404, invalid option -> 422 {detail}"
+    },
+    {
+      "criterion": "Assessment stores question-level evidence and detects the root gap",
+      "name": "assessment-flow-detects-gap",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "One question shown at a time with 'Question N of 10' progress; Next/Previous verified; 'Load demo pattern' + walk to Q10 + submit -> assessment-result-view with score and diagnosis title 'Lifo prerequisite gap'; Review evidence opens evidence-drawer with diagnosed-root-gap=Lifo"
+    },
+    {
+      "criterion": "Why Am I Stuck explains the diagnosis from stored evidence",
+      "name": "test_tscheck_why_stuck_evidence.py",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "GET /api/gaps/demo-student -> 1 active gap (lifo/stack); GET /api/gaps/demo-student/stack -> 200 with confidence in (0,1], evidence[] containing FIFO/LIFO text; learning-state stack.root_gap==lifo and confidence matches gap; GET /api/gaps/demo-student/push -> 404 (no active gap for that concept)"
+    },
+    {
+      "criterion": "Why Am I Stuck explains the diagnosis from stored evidence",
+      "name": "stuck-view-shows-evidence",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Evidence drawer shows diagnosed-concept=Stack, diagnosed-root-gap=Lifo, confidence badge with %, >=1 evidence-item rows mentioning FIFO/LIFO, and prerequisite-link text 'LIFO -> Stack'"
+    },
+    {
+      "criterion": "Recovery Center provides real content and gates targeted practice",
+      "name": "test_tscheck_recovery_gating.py",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "POST /api/interventions/start -> type=simple_explanation, content.title/visual/example populated (MOCKED deterministic provider); POST /api/retest/start before 3 practice submissions -> 409; 3x POST /api/practice/submit increments practice_completed 1..3 and retest_unlocked flips true only at 3; retest/start after -> 200; practice/submit for a non-targeted question id -> 422"
+    },
+    {
+      "criterion": "Recovery Center provides real content and gates targeted practice",
+      "name": "recovery-gates-retest",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Recovery Center renders intervention-type-badge=Simple Explanation, intervention-explanation/lifo-visual/worked-example; retest-lock-copy shows 'locked' text; retest-unlock-card absent after 1-2 practice submissions and appears only after the 3rd, with recovery-progress-title='3 / 3'"
+    },
+    {
+      "criterion": "Retest measures recovery and updates the learning path",
+      "name": "test_tscheck_retest_recovery.py",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "After 3 practice submissions, POST /api/retest/start -> 200 mastery_before matches stored state; POST /api/retest/submit with all-correct answers -> status=RECOVERED, mastery_after>=0.8, improvement>0, unlocked_concept=stack; GET /api/learning-path/demo-student shows lifo.status=recovered and stack.status!=locked; GET /api/gaps/demo-student -> [] (gap resolved); POST /api/retest/submit with bogus retest_id -> 404"
+    },
+    {
+      "criterion": "Retest measures recovery and updates the learning path",
+      "name": "retest-recovers-stack",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "After completing 3 practice questions via UI, retest-card renders 3 questions; 'Use answer key' + submit -> retest-result-view shows retest-status=RECOVERED and unlocked-concept-message 'Stack unlocked'; Learning Path view's path-node-stack no longer shows 'locked'"
+    },
+    {
+      "criterion": "Adaptive loop changes strategy after a weak retest",
+      "name": "test_tscheck_adaptive_loop.py",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "First intervention type=simple_explanation; retest submitted with all wrong answers -> status in {NOT_RECOVERED, PARTIALLY_RECOVERED}, unlocked_concept=null, learning-path lifo.status!=recovered; second POST /api/interventions/start -> type=visual_explanation (differs from first)"
+    },
+    {
+      "criterion": "Adaptive loop changes strategy after a weak retest",
+      "name": "adaptive-loop-changes-strategy",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Selecting the wrong option for all 3 retest questions -> retest-result-view shows status in {NOT RECOVERED, PARTIALLY RECOVERED}, no unlocked-concept-message, try-different-intervention-button visible; clicking it opens recovery-center with intervention-type-badge=Visual Explanation"
+    },
+    {
+      "criterion": "Dashboard and Teacher Radar reflect shared learning state",
+      "name": "test_tscheck_dashboard_radar_state.py",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "GET /api/dashboard/demo-student before/after assessment: active_gaps 0->1, assessment_count 0->1, recent_activity includes assessment_completed+gap_detected; GET /api/teacher/radar shows demo-student in students_needing_attention and lifo in common_gaps"
+    },
+    {
+      "criterion": "Dashboard and Teacher Radar reflect shared learning state",
+      "name": "dashboard-teacher-radar-reflect-state",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Dashboard shows active-gaps-card=1 and a gap banner plus an activity event mentioning 'assessment'; Teacher Radar tab shows attention-count-card!=0, student-attention-demo-student row, and common-gap-lifo row, all sourced from the same backend state"
+    },
+    {
+      "criterion": "Curriculum graph, question bank, validation, and error states are real",
+      "name": "test_tscheck_curriculum_validation.py",
+      "lane": "backend",
+      "status": "passed",
+      "evidence": "GET /api/concepts -> 13 concepts including lifo/stack/push/pop/fifo/queue/enqueue/dequeue; GET /api/questions -> 32 metadata-rich questions (concept_id, difficulty, misconception_tag, source); GET /api/learning-path/demo-student confirms prerequisite edges lifo->stack->push/pop and fifo->queue->enqueue/dequeue; GET /api/dashboard/no-such-student -> 404 {detail}; POST /api/assessment/submit with invalid option -> 422 {detail}"
+    },
+    {
+      "criterion": "Curriculum graph, question bank, validation, and error states are real",
+      "name": "learning-path-shows-prerequisite-graph",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Learning Path view renders >=13 path-node-* cards; path-node-stack shows 'After Lifo', path-node-push/pop show 'After Stack', path-node-queue shows 'After Fifo', path-node-enqueue/dequeue show 'After Queue'; stack node shows Locked status prior to recovery"
+    }
+  ]
+}

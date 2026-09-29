@@ -1,0 +1,68 @@
+{
+  "iteration": 2,
+  "passed": 8,
+  "failed": 0,
+  "bugs": [],
+  "action_items": [
+    "Legacy backend suite (test_tscheck_*.py from iteration 1, covering the pre-Home dashboard/assessment/recovery/retest/radar/curriculum criteria) now fails 12/16 tests with 401 'Sign in to continue'. Root cause confirmed in services/auth.py: those API routes now require an authenticated session cookie, added as part of this Home-launcher/login feature. This is NOT a defect against any criterion in the current acceptance_matrix (all 8 current criteria are UI-facing and were verified live, authenticated, via browser checks -- the same underlying dashboard/assessment/recovery/retest/radar flows all worked correctly inside an authenticated browser session). The legacy pytest client fixture in tests/conftest.py has no login step, so it is simply stale against the new auth requirement. Recommend the main agent (or a future iteration) update tests/conftest.py to log in as the demo student/teacher and carry the session cookie, or explicitly scope this out if API-first (non-browser) access is intentionally not supported. Not filed as a bug because no criterion in this iteration's matrix concerns unauthenticated API access."
+  ],
+  "retest_needed": false,
+  "checks": [
+    {
+      "criterion": "Authenticated users land on LearnLens Home before Dashboard",
+      "name": "home-first-workspace-after-login",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Student login -> home-launcher visible immediately, student-dashboard has count 0 until a card is clicked; same verified for teacher login -> home-launcher visible, teacher-radar-view count 0"
+    },
+    {
+      "criterion": "Home contains exactly the confirmed seven feature cards and no permanent sidebar",
+      "name": "home-shows-seven-cards-no-sidebar",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "home-feature-grid contains exactly 7 buttons matching dashboard/assessment/stuck/recovery/path/library/classrooms testids; mastery-overview-card, sidebar nav, and student-dashboard all have count 0 on Home"
+    },
+    {
+      "criterion": "Uploaded LearnLens logo is used unchanged",
+      "name": "logo-loads-unchanged-original",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Header img[data-testid=learnlens-logo] src=/LearnLens_logo.svg with object-contain class; fetched SVG body declares 1024 dimension; file sha256sum on disk = e8297a79ccbb7a47a8f8e3905e7542d786439d80a6385980a2cd86e067540e2a matching required hash exactly"
+    },
+    {
+      "criterion": "Every Home feature card opens the corresponding working feature",
+      "name": "home-cards-open-correct-features",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Each of the 7 home-feature-* cards opened its target view (student-dashboard, assessment-view/start/result, stuck-empty/evidence-drawer, recovery-start/center/result, learning-path-view, library-view, classrooms-view) and return-home-button returned to home-launcher every time"
+    },
+    {
+      "criterion": "Profile icon and drawer match the required placement and interaction",
+      "name": "profile-drawer-placement-and-interaction",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "At 390px viewport: profile icon boundingBox x is left of logo boundingBox x; drawer opens at 45.5% of viewport width (within 40-55% band); outside click at (350,400) closes drawer and returns to home-launcher; X close button also closes it"
+    },
+    {
+      "criterion": "Profile drawer contains only requested profile content",
+      "name": "profile-drawer-contains-only-profile-content",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "profile-picture, profile-name, profile-role-status, profile-class, about-us-button, manage-profile-button, profile-logout-button, profile-drawer-close-button all visible inside drawer; all 7 home-feature-* testids have count 0 inside the drawer scope"
+    },
+    {
+      "criterion": "Classroom Radar card preserves role rules for classroom links",
+      "name": "classroom-radar-role-rules",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "Teacher: create-classroom-card visible, join-classroom-card count 0; created tscheck-radar-<ts> classroom, got join code, roster-card and publish-assessment-card visible. Student (different login): create-classroom-card count 0, join-classroom-card visible; joined via the same code -> active-classroom-name matches, roster-card and publish-assessment-card count 0"
+    },
+    {
+      "criterion": "Home and drawer are usable on mobile and desktop",
+      "name": "home-and-drawer-responsive-mobile-desktop",
+      "lane": "browser",
+      "status": "passed",
+      "evidence": "At 390x844: dashboard/assessment cards share row (deltaY<=10) with card2 to the right, two-column grid confirmed; drawer width ~177px within 150-220px band matching ~187px target. At 1440x900: home-feature-grid width capped under 1100px (not full-bleed); drawer still left-anchored (x<=5) and capped under 400px width"
+    }
+  ]
+}
