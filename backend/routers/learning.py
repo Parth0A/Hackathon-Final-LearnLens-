@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import uuid4
 
@@ -13,6 +13,7 @@ from models.learning import (
     PathItem, PracticeResult, PracticeSubmission, Question, RadarResponse, ResetResponse,
     RetestResult, RetestSession, StartAssessmentRequest, StartInterventionRequest,
     StartRetestRequest, SubmitAssessmentRequest, SubmitRetestRequest, Student, PublicQuestion,
+    TeacherOverviewResponse, TeacherStudentActivity,
 )
 from services.curriculum import ASSESSMENT_QUESTION_IDS, CONCEPT_BY_ID, PRACTICE_QUESTION_IDS, QUESTION_BY_ID, RETEST_QUESTION_IDS
 from services.debugger import diagnose_root_gap
@@ -446,6 +447,70 @@ async def teacher_radar(teacher: dict = Depends(require_role("teacher"))) -> Rad
         misconceptions=[{"tag": "FIFO_LIFO_CONFUSION", "label": "LIFO/FIFO confusion", "occurrences": len([item for item in misconception_attempts if not item.get("correct")])}],
         intervention_results=[{"type": item.get("type", "unknown"), "result": item.get("result") or "IN PROGRESS", "student_id": item.get("student_id"), "improvement": round((float(item.get("mastery_after", item.get("mastery_before", 0))) - float(item.get("mastery_before", 0))) * 100)} for item in interventions],
         recovery_comparison=recovery_comparison,
+    )
+
+
+ACTIVE_WINDOW_MINUTES = 30
+
+
+@router.get("/teacher/overview", response_model=TeacherOverviewResponse)
+async def teacher_overview(teacher: dict = Depends(require_role("teacher"))) -> TeacherOverviewResponse:
+    await ensure_seeded()
+    classrooms = await db.classrooms.find({"owner_id": teacher["id"]}).to_list(100)
+    classroom_ids = [item["id"] for item in classrooms]
+    memberships = await db.classroom_memberships.find({"classroom_id": {"$in": classroom_ids}}).to_list(1000) if classroom_ids else []
+    student_ids = sorted({item["student_id"] for item in memberships})
+    assessments_count = await db.classroom_assessments.count_documents({"classroom_id": {"$in": classroom_ids}}) if classroom_ids else 0
+    if not student_ids:
+        return TeacherOverviewResponse(students_enrolled=0, active_now=0, active_window_minutes=ACTIVE_WINDOW_MINUTES, assessments=assessments_count, needs_attention=0, class_mastery=None, students=[])
+    students = {item["id"]: item for item in await db.students.find({"id": {"$in": student_ids}}).to_list(1000)}
+    states = await db.learning_states.find({"student_id": {"$in": student_ids}}).to_list(1000)
+    gaps = await db.learning_gaps.find({"student_id": {"$in": student_ids}, "status": "active"}).to_list(1000)
+    needs_attention_ids = {item["student_id"] for item in gaps}
+    class_mastery = round(sum(float(item.get("mastery", 0.0)) for item in states) / len(states), 2) if states else None
+    now = datetime.now(timezone.utc)
+    cutoff = (now - timedelta(minutes=ACTIVE_WINDOW_MINUTES)).isoformat()
+    user_docs = await db.users.find({"student_id": {"$in": student_ids}}).to_list(1000)
+    user_to_student = {item["id"]: item.get("student_id") for item in user_docs}
+    recent_sessions = await db.sessions.find({"user_id": {"$in": list(user_to_student)}, "created_at": {"$gte": cutoff}, "expires_at": {"$gt": now.isoformat()}}).to_list(1000)
+    active_ids = {user_to_student[item["user_id"]] for item in recent_sessions if user_to_student.get(item["user_id"])}
+    events = await db.activity_events.find({"student_id": {"$in": student_ids}}).sort("created_at", -1).to_list(5000)
+    latest_by_student: dict[str, dict[str, Any]] = {}
+    for item in events:
+        latest_by_student.setdefault(item["student_id"], item)
+        if item.get("created_at", "") >= cutoff:
+            active_ids.add(item["student_id"])
+    states_by_student: dict[str, list[dict[str, Any]]] = {}
+    for item in states:
+        states_by_student.setdefault(item["student_id"], []).append(item)
+    roster: list[TeacherStudentActivity] = []
+    for student_id in student_ids:
+        latest = latest_by_student.get(student_id)
+        student_states = states_by_student.get(student_id, [])
+        if student_id in needs_attention_ids:
+            status = "needs_attention"
+        elif any(item.get("recovery_status") == "in_recovery" for item in student_states):
+            status = "in_recovery"
+        elif student_states:
+            status = "on_track"
+        else:
+            status = "not_started"
+        roster.append(TeacherStudentActivity(
+            student_id=student_id,
+            name=students.get(student_id, {}).get("name", student_id),
+            active=student_id in active_ids,
+            last_activity_label=latest.get("label") if latest else None,
+            last_activity_at=latest.get("created_at") if latest else None,
+            learning_status=status,
+        ))
+    return TeacherOverviewResponse(
+        students_enrolled=len(student_ids),
+        active_now=len(active_ids),
+        active_window_minutes=ACTIVE_WINDOW_MINUTES,
+        assessments=assessments_count,
+        needs_attention=len(needs_attention_ids),
+        class_mastery=class_mastery,
+        students=roster,
     )
 
 

@@ -220,6 +220,25 @@ class RadarResponse(BaseModel):
     recovery_comparison: list[dict[str, Any]] = Field(default_factory=list)
 
 
+class TeacherStudentActivity(BaseModel):
+    student_id: str
+    name: str
+    active: bool
+    last_activity_label: str | None = None
+    last_activity_at: str | None = None
+    learning_status: str
+
+
+class TeacherOverviewResponse(BaseModel):
+    students_enrolled: int
+    active_now: int
+    active_window_minutes: int
+    assessments: int
+    needs_attention: int
+    class_mastery: float | None = None
+    students: list[TeacherStudentActivity] = Field(default_factory=list)
+
+
 class ResetResponse(BaseModel):
     message: str
     student: Student

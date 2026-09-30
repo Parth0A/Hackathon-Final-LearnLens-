@@ -167,6 +167,25 @@ export interface RadarResponse {
   recovery_comparison: { concept_id: string; name: string; before: number; after: number; recovered: number }[];
 }
 
+export interface TeacherStudentActivity {
+  student_id: string;
+  name: string;
+  active: boolean;
+  last_activity_label: string | null;
+  last_activity_at: string | null;
+  learning_status: string;
+}
+
+export interface TeacherOverview {
+  students_enrolled: number;
+  active_now: number;
+  active_window_minutes: number;
+  assessments: number;
+  needs_attention: number;
+  class_mastery: number | null;
+  students: TeacherStudentActivity[];
+}
+
 export interface ResetResponse {
   message: string;
   student: Student;
