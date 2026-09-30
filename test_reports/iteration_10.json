@@ -1,0 +1,44 @@
+{
+  "summary": "Backend GET /api/teacher/overview is fully functional and returns the correct shape/values (5 students, active_window_minutes=30, class_mastery=0.13, assessments=0, needs_attention=0). Authorization is enforced correctly (401 without session, 403 for student). However, the NEW frontend sections (class-overview-section, student-activity-section) are UNREACHABLE from the UI because the TeacherView (data-testid=teacher-radar-view, view=='teacher') has no navigation entry: clicking home-feature-classrooms sets view='classrooms' which renders ClassroomsView ('Manage your classrooms.'), NOT TeacherView. Nothing in featureItems, Home.tsx, or ClassroomsView calls navigate('teacher'). Student login regression passes; student home-launcher renders correctly.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Home.tsx / featureItems", "issue": "TeacherView (view='teacher') is orphaned. No button/nav navigates to view='teacher', so data-testid=teacher-radar-view, class-overview-section, overview-* metric cards and student-activity-section never render for a logged-in teacher. Clicking home-feature-classrooms goes to view='classrooms' -> ClassroomsView (management screen), which does not include the new class overview or student activity sections.", "selector": "[data-testid=teacher-radar-view]", "priority": "CRITICAL"}
+    ],
+    "integration_issues": [
+      {"flow": "Teacher login -> Classroom Radar -> Class overview", "issue": "New /api/teacher/overview data (overviewQuery) is fetched only when TeacherView mounts, but TeacherView is never reached from any UI element. The React component and data-testids exist in code but are unreachable at runtime.", "affected_selectors": ["[data-testid=teacher-radar-view]", "[data-testid=class-overview-section]", "[data-testid=overview-students-enrolled]", "[data-testid=overview-active-now]", "[data-testid=overview-assessments]", "[data-testid=overview-needs-attention]", "[data-testid=overview-class-mastery]", "[data-testid=student-activity-section]"]}
+    ],
+    "design_issues": []
+  },
+  "verification_results": {
+    "GET /api/teacher/overview (no cookie)": "401",
+    "GET /api/teacher/overview (student cookie)": "403 {'detail':'Teacher access required'}",
+    "GET /api/teacher/overview (teacher cookie)": "200 {students_enrolled:5, active_now:1, active_window_minutes:30, assessments:0, needs_attention:0, class_mastery:0.13, students:[5 entries with student_id,name,active,last_activity_label,last_activity_at,learning_status]}",
+    "Students list": "Demo Student(in_recovery, active=true), Maya Patel/Jon Bell/Priya Shah/Leo Martin (in_recovery, active=false, 'LIFO gap detected')",
+    "Frontend teacher-radar-view rendered": "NO — never reachable; home-feature-classrooms -> view='classrooms' -> ClassroomsView (Manage your classrooms.)",
+    "Student home-launcher regression": "PASS"
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_teacher_overview.py",
+    "/app/test_reports/pytest/teacher_overview.xml"
+  ],
+  "action_items": [
+    "CRITICAL: Wire up navigation so a teacher can reach view='teacher'. Options: (a) When user.role==='teacher' and view==='classrooms' render <TeacherView/> above/instead of ClassroomsView; (b) Add a featureItem with id='teacher' shown only for teachers; (c) In ClassroomsView (teacher mode), add a 'Open Classroom Radar' button that calls onOpen('teacher'); (d) Redirect navigate() such that teacher clicking 'classrooms' feature sets view='teacher'.",
+    "After navigation fix, verify: teacher-radar-view renders with class-overview-section showing 5/1/0/0/13% (active_now legitimately can be 1 due to teacher session activity; API returned 1 during this run), student-activity-section lists all 5 students with badges, and existing radar cards (class-mastery-card etc.) render below unchanged."
+  ],
+  "critical_code_review_comments": [
+    "Home.tsx line ~194-195: `{view === 'classrooms' ? <ClassroomsView .../> : null} {view === 'teacher' ? <TeacherView .../> : null}` — the 'teacher' branch is dead code because no code path calls setView('teacher').",
+    "Home.tsx featureItems (line 21-30) has 'classrooms' -> label 'Classroom Radar' with description that fits BOTH ClassroomsView and TeacherView, but only ClassroomsView is reachable. Consider splitting into a teacher-only 'Classroom Radar' (view='teacher') vs student-only 'Classrooms' (view='classrooms').",
+    "Backend routers/learning.py teacher/overview: correct implementation; active_now was 1 when tested (teacher session created within 30 min) — this is expected behavior per the labeled 30-min window."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_teacher_overview.py (new)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "0% (feature unreachable in UI)"},
+  "test_credentials": "teacher@learnlens.demo / LearnLens#Teacher1 ; student@learnlens.demo / LearnLens#Student1",
+  "seed_data_creation": "None (read-only tests).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend /api/teacher/overview verified end-to-end with pytest (4/4 pass). The frontend TeacherView component and all new data-testids exist in /app/frontend/src/pages/Home.tsx (lines ~598-604) but are never rendered because view='teacher' is never triggered by any UI element — 'home-feature-classrooms' maps to view='classrooms' which renders ClassroomsView instead. Main agent must add a navigation path (see action_items). After fix, re-run the UI verification: click Classroom Radar as teacher -> expect [data-testid=teacher-radar-view] with class-overview-section (5/students_enrolled, active_now, 0/assessments, 0/needs_attention, 13% mastery) and student-activity-section listing 5 students.",
+  "rca of the issue": "TeacherView is guarded by `view === 'teacher'` (Home.tsx line 195) but no button/handler ever calls setView('teacher'). featureItems only lists 'classrooms' (which maps to ClassroomsView). Consequently, the newly-added class-overview-section and student-activity-section cannot be observed by any teacher user through normal UI flow. Fix requires adding a navigation trigger (see action_items)."
+}
