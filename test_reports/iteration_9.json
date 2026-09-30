@@ -1,0 +1,35 @@
+{
+  "summary": "Verified Emergent File & Media Storage integration end-to-end after EMERGENT_LLM_KEY was set in backend/.env. All 5 acceptance criteria pass: (1) /library/storage returns enabled=true provider='Emergent File & Media Storage' message='Storage connected'; (2) UI shows storage-connection-badge='Connected', storage-message='Storage connected', and all upload buttons (upload-file-button, browse-document-button, browse-image-button) ENABLED; (3) UI file upload via set_input_files on data-testid=library-file-input successfully created a library-item card with correct filename and increased used_bytes on storage card; (4) preview panel opens on preview-item-<id> click, and /api/library/items/<id>/download returns HTTP 200 with exact file contents; (5) delete-item-<id> (with window.confirm accepted) removes item; note creation (create-note-button → note-name-input + note-content-input → save-note-button) works; teacher login + upload works and item is marked retrieval_status='ready_for_future_retrieval'. No CORS/403 errors observed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "verification_results": {
+    "backend_public_url": "https://lens-inspect-2.preview.emergentagent.com",
+    "GET /api/library/storage": "200 {enabled:true, provider:'Emergent File & Media Storage', limit_bytes:524288000, used_bytes:0, message:'Storage connected'}",
+    "POST /api/library/upload (student, .txt)": "200 created LibraryItem, storage_path='learnlens/uploads/demo-student/<uuid>.txt', source_metadata.source='Personal student library', retrieval_status='not_applicable'",
+    "GET /api/library/items/<id>/download": "200, body matches exact uploaded bytes",
+    "DELETE /api/library/items/<id>": "204 (307 redirect issue only when trailing slash used); item removed from GET /items",
+    "POST /api/library/notes": "200 created note kind='note' storage_path=null",
+    "POST /api/library/upload (teacher)": "200 retrieval_status='ready_for_future_retrieval' source='Teacher-uploaded course material'",
+    "UI storage badge": "'Connected' (after query resolves ~1s)",
+    "UI upload buttons": "all enabled once storage.data resolved",
+    "UI upload flow": "set_input_files triggers uploadMany → library-item-<uuid> card appears with filename",
+    "UI preview panel": "opens on preview-item click; close-preview-button works",
+    "UI delete flow": "window.confirm accepted → deleteItem mutation → item removed from grid",
+    "UI note flow": "note created and rendered as library item card"
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Minor: The `download_item` handler in routers/library.py sends Content-Disposition 'inline' rather than 'attachment' for file kind — this matches the frontend preview/download flow (window.open in a new tab renders inline), so this is intentional but worth noting for API clients that expect a forced download.",
+    "Minor: Upload button is disabled immediately on page load because storage.data is undefined until the /library/storage query resolves; users may see 'Disabled' badge briefly (~200-800ms) before it flips to 'Connected'. Consider showing a 'Checking storage…' skeleton/loader instead of the amber 'Disabled' badge during the initial fetch.",
+    "Info: DELETE endpoint at /api/library/items/<id> issues a 307 redirect when called with trailing slash; the frontend does not use a trailing slash so no user impact."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "student@learnlens.demo / LearnLens#Student1 ; teacher@learnlens.demo / LearnLens#Teacher1 (both verified)",
+  "seed_data_creation": "All test artifacts (student .txt upload, teacher .txt upload, TEST_ note, TEST_UI_note) were deleted at end of tests. Final library state: 0 items.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "EMERGENT_LLM_KEY is set in /app/backend/.env enabling Emergent File & Media Storage via services/storage.py. Storage endpoints under /api/library/* all healthy. Frontend Vite proxy sends /api → localhost:8001; public preview at https://lens-inspect-2.preview.emergentagent.com. Note the storage badge may briefly show 'Disabled/Checking storage…' before the query resolves — wait ~1s (or wait_for_function on badge text) before asserting.",
+  "rca of the issue": "N/A — feature verification only. Feature was previously gated OFF via missing EMERGENT_LLM_KEY; adding it in backend/.env enables storage_enabled() to return True and all upload/download flows now work end-to-end."
+}

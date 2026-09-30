@@ -48,7 +48,10 @@ report the existing features and any blockers.
      were not wrapped; added a `<>…</>` fragment.
 
 ## Remaining blockers / inactive without keys (preview-acceptable)
-- Library file uploads: disabled until EMERGENT_LLM_KEY is provided (returns clear message).
+- ~~Library file uploads~~ — ACTIVATED 2026-09-30: Emergent File & Media Storage enabled by setting
+  EMERGENT_LLM_KEY in backend/.env (integration was already fully coded in services/storage.py +
+  routers/library.py + LibraryView.tsx; no code changes). Verified iteration_9 (100% BE+FE):
+  student/teacher upload → store → preview → download → delete all work; notes unaffected.
 - ~~Admin email verification~~ — ACTIVATED 2026-09-29 via Resend (RESEND_API_KEY + EMAIL_FROM +
   ADMIN_EMAIL=parthandhale07@gmail.com set in backend/.env). Full E2E VERIFIED (test_reports/iteration_4.json):
   real emailed code verified (200, user learnlens-admin role=admin created, session cookie persists),
