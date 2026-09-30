@@ -1,0 +1,27 @@
+{
+  "summary": "Retest of Teacher Dashboard navigation fix. Backend pytest 4/4 pass. Frontend flow fully verified: teacher login → home-feature-teacher card visible & clickable → teacher-radar-view renders. Class overview shows 5/1/0/0/13% (students-enrolled/active-now/assessments/needs-attention/class-mastery). All 5 student-activity rows present with correct names (Demo Student, Maya Patel, Jon Bell, Priya Shah, Leo Martin). All 5 existing radar cards intact (class-mastery-card, attention-count-card, intervention-count-card, common-gaps-card, students-attention-card). Classrooms management view (home-feature-classrooms) still opens with 'Manage your classrooms' heading. Student login: home-launcher renders and interactive home-feature-teacher is NOT rendered (count=0). MINOR: On the student's pre-subject-select screen, a locked variant 'locked-feature-teacher' tile is still shown because the locked-features grid (Home.tsx line 518) does not filter out teacherOnly items — the teacherOnly filter is only applied to the active feature-grid at line 533.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Home.tsx locked-features grid", "issue": "Students see a locked 'Teacher Dashboard' tile (data-testid=locked-feature-teacher) on the pre-subject-select state. teacherOnly filter is only applied to the active home-feature-grid (line 533), not to the locked-features grid (line 518). Requirement says students must NOT see the Teacher Dashboard card at all.", "selector": "[data-testid=locked-feature-teacher]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_teacher_overview.py"],
+  "action_items": [
+    "OPTIONAL/LOW: In frontend/src/pages/Home.tsx line 518, also filter out teacherOnly items when user.role !== 'teacher' in the locked-features grid: featureItems.filter((item) => !['library','schedule-planner','dashboard','classrooms'].includes(item.id) && !(item.teacherOnly && user.role !== 'teacher'))"
+  ],
+  "critical_code_review_comments": [
+    "Home.tsx is 610 lines and dense (long single-line JSX). Consider splitting TeacherView, RecoveryCenter, and LearningPath into separate files for maintainability.",
+    "teacherOnly filter is duplicated logic; recommend a helper `isFeatureVisible(item, user)` to avoid drift between active/locked grids (root cause of the minor issue above)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "95%"},
+  "test_credentials": "Teacher: teacher@learnlens.demo / LearnLens#Teacher1; Student: student@learnlens.demo / LearnLens#Student1",
+  "seed_data_creation": "None; used existing seed.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend GET /api/teacher/overview: teacher=200 (5 students, mastery 13%), student=403. TeacherView renders correctly. Only outstanding item is the locked-feature-teacher tile visible to students on the pre-subject-select screen — low severity cosmetic mismatch with requirement (6).",
+  "rca of the issue": "The teacherOnly filter was added only to the interactive home-feature-grid (Home.tsx L533). The parallel locked-features grid (L518), rendered when no subject is selected, iterates featureItems with a whitelist filter and does not apply the role-based teacherOnly filter, so a locked 'Teacher Dashboard' tile appears for students. Fix: add `&& !(item.teacherOnly && user.role !== 'teacher')` to the filter on line 518."
+}

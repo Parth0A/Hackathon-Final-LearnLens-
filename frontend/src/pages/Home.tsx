@@ -515,7 +515,7 @@ function HomeLauncher({ user, onOpen }: { user: User; onOpen: (view: View) => vo
             })}
           </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          {featureItems.filter((item) => !["library", "schedule-planner", "dashboard", "classrooms"].includes(item.id)).map((item) => {
+          {featureItems.filter((item) => !["library", "schedule-planner", "dashboard", "classrooms"].includes(item.id) && !(item.teacherOnly && user.role !== "teacher")).map((item) => {
             const Icon = item.icon;
             return <button key={item.id} type="button" onClick={() => toast.error("Select SUBJECT First")} aria-disabled="true" data-testid={`locked-feature-${item.id}`} className="relative min-h-20 w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 pr-8 text-left opacity-75">
               <div className="flex items-center gap-2 text-slate-500"><Icon size={16} /><span className="text-xs font-semibold">{item.label}</span></div><Lock aria-hidden="true" size={12} strokeWidth={2.5} className="absolute right-2.5 top-2.5 text-slate-800" />

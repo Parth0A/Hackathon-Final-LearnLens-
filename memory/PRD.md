@@ -81,3 +81,11 @@ No further building requested under this plan.
   NOTE: platform infra creates local "checkpoint" commits that re-add the workflow file to the local index
   (local main may diverge from origin/main); before any future push either grant the token Workflows scope
   or re-exclude .github/workflows from the index.
+- 2026-09-30: Teacher Dashboard improvement (additive, teacher-scoped). New backend GET /api/teacher/overview
+  (real DB values: students enrolled via memberships, active_now via labeled 30-min recent-activity window
+  [session created or activity event], assessments count for owned classrooms, needs_attention via active gaps,
+  class_mastery avg or "Not enough data", per-student activity roster). Frontend: class-overview-section +
+  student-activity-section added to TeacherView; added teacher-only "Teacher Dashboard" nav card
+  (TeacherView was previously orphaned — no nav reached view='teacher'). Verified iterations 10-11
+  (backend pytest 4/4; frontend 100% after nav fix; student/teacher/classrooms regressions pass;
+  authorization: student→403, anonymous→401).
