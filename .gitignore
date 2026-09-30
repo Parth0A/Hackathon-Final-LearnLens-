@@ -92,3 +92,9 @@ android-sdk/
 credentials.json
 *.key
 .credentials
+
+# Platform internals (environment-specific, not project code)
+.emergent/
+
+# CI workflow excluded until GitHub token has Workflows scope
+.github/workflows/
