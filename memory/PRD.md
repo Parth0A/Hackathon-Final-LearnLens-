@@ -71,3 +71,10 @@ No further building requested under this plan.
   data-testid=admin-logout-button), using the existing endSession() mechanism (POST /auth/logout →
   cache clear → redirect to Login). Verified iteration_7: button renders, logout returns to Login and
   invalidates the session server-side; student/teacher regressions pass.
+- 2026-09-29: Git fix — /app was missing .git ("fatal: not a git repository"). Initialized git (branch main),
+  remote origin = github.com/Parth0A/Hackathon-Final-LearnLens-.git, pushed as initial history (no force-push).
+  .github/workflows/backend-tests.yml excluded from the PUSHED commit only (user token lacks GitHub 'workflow'
+  scope); file remains on disk. Verified iteration_8: repo healthy, secrets not tracked, app unaffected.
+  NOTE: platform infra creates local "checkpoint" commits that re-add the workflow file to the local index
+  (local main may diverge from origin/main); before any future push either grant the token Workflows scope
+  or re-exclude .github/workflows from the index.
