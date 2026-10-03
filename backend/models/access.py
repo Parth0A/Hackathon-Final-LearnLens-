@@ -43,7 +43,7 @@ class AuthResponse(BaseModel):
 
 class StorageStatus(BaseModel):
     enabled: bool
-    provider: str = "Emergent File & Media Storage"
+    provider: str = "MongoDB GridFS"
     limit_bytes: int
     used_bytes: int
     message: str
