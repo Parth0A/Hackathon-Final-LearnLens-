@@ -175,7 +175,7 @@ export default function Home({ user }: { user: User }) {
       </header>
 
       <div className="mx-auto max-w-6xl">
-        <main className="min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-9">
+        <main data-testid="learning-ui-surface" className="theme-ui-surface min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-9">
           {view !== "home" ? (
             <button type="button" aria-label="Go back" data-testid="back-button" onClick={() => navigate("home")} className="mb-4 inline-flex size-9 items-center justify-center rounded-full border border-[#E2D9CE] bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
               <ChevronLeft size={17} />
