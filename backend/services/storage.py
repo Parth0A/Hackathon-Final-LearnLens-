@@ -33,7 +33,7 @@ def _bucket() -> AsyncIOMotorGridFSBucket:
 async def put_object(path: str, content: bytes, content_type: str) -> dict[str, Any]:
     file_id = await _bucket().upload_from_stream(
         path,
-        content,
+        BytesIO(content),
         metadata={"app": APP_NAME, "content_type": content_type},
     )
     return {"path": path, "size": len(content), "file_id": str(file_id)}
