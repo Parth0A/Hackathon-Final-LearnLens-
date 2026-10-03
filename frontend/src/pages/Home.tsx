@@ -461,7 +461,6 @@ function AdminView() {
 
 function HomeLauncher({ user, onOpen }: { user: User; onOpen: (view: View) => void }) {
   if (user.role === "student") {
-    const subjects = ["Data Structures", "Database Management Systems", "Operating Systems", "Computer Networks", "Object-Oriented Programming", "Mathematics", "Physics", "Chemistry"];
     return <section data-testid="home-launcher" aria-labelledby="home-launcher-title" className="animate-rise-in py-2 sm:py-6">
     <div className="mx-auto max-w-5xl">
       <Card data-testid="learning-debugger-core-card" className="overflow-hidden border-blue-200 bg-gradient-to-br from-blue-50 via-white to-indigo-50 shadow-[0_18px_45px_rgba(37,99,235,0.10)]">
