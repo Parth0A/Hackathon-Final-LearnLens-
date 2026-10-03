@@ -5,13 +5,14 @@ import secrets
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile
 
 from lib.db import db
 from models.access import AuthResponse, LoginRequest, ProfileUpdateRequest, RegisterRequest, UserResponse
 from services.auth import COOKIE_NAME, create_session, hash_password, optional_user, password_needs_rehash, public_user, require_user, token_digest, verify_password
 from services.curriculum import CONCEPTS
 from services.seeding import now_iso
+from services.storage import MAX_FILE_BYTES, delete_object, get_object, put_object
 
 
 router = APIRouter(prefix="/auth")
@@ -119,6 +120,45 @@ async def update_profile(payload: ProfileUpdateRequest, user: dict = Depends(req
         await db.students.update_one({"id": user["student_id"]}, {"$set": {"name": payload.name, "education_level": payload.class_name or "Student"}})
     user.update(values)
     return UserResponse(**public_user(user))
+
+
+@router.post("/profile/avatar", response_model=UserResponse)
+async def upload_profile_avatar(file: UploadFile = File(...), user: dict = Depends(require_user)) -> UserResponse:
+    allowed_types = {"image/jpeg", "image/png", "image/webp"}
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Use a JPG, PNG, or WebP image.")
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="The image is empty.")
+    if len(content) > 2 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Profile photos must be 2 MB or smaller.")
+
+    extension = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}[file.content_type]
+    path = f"profiles/{user['id']}/avatar{extension}"
+    old_path = user.get("avatar_path")
+    await put_object(path, content, file.content_type)
+    if old_path and old_path != path:
+        await delete_object(old_path)
+
+    avatar_url = f"/api/auth/avatar/{user['id']}?v={int(datetime.now(timezone.utc).timestamp())}"
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"avatar_path": path, "avatar_url": avatar_url, "updated_at": now_iso()}},
+    )
+    user.update({"avatar_path": path, "avatar_url": avatar_url})
+    return UserResponse(**public_user(user))
+
+
+@router.get("/avatar/{user_id}")
+async def get_profile_avatar(user_id: str):
+    user = await db.users.find_one({"id": user_id, "active": True}, {"avatar_path": 1})
+    if not user or not user.get("avatar_path"):
+        raise HTTPException(status_code=404, detail="Profile photo not found")
+    try:
+        content, content_type = await get_object(user["avatar_path"])
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Profile photo not found")
+    return Response(content=content, media_type=content_type, headers={"Cache-Control": "private, max-age=300"})
 
 
 @router.post("/logout", status_code=204)
