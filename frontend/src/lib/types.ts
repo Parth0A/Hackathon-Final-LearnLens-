@@ -306,6 +306,7 @@ export interface RetentionItem {
   last_updated: string;
   status: string;
   next_action: string;
+  next_revision_at: string | null;
 }
 
 export interface ResourceXRay {
