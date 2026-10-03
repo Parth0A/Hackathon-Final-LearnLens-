@@ -472,8 +472,8 @@ function HomeLauncher({ user, onOpen }: { user: User; onOpen: (view: View) => vo
       <div className="mx-auto max-w-4xl">
         <div className="mb-6">
           <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-blue-600">Student workspace</p>
-          <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight text-slate-900">Select a subject to begin.</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">LearnLens is currently connected to the Data Structures demo dataset. Other subjects are shown to demonstrate broader coverage.</p>
+          <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight text-slate-900">Learning Debugger</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Select a subject to unlock the first diagnostic stage. Your debugger progress is saved so you can leave and continue later.</p>
         </div>
 
         <div data-testid="subjects-block" className="relative">
@@ -516,15 +516,6 @@ function HomeLauncher({ user, onOpen }: { user: User; onOpen: (view: View) => vo
               </button>;
             })}
           </div>
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          {featureItems.filter((item) => !["library", "schedule-planner", "dashboard", "classrooms"].includes(item.id) && !(item.teacherOnly && user.role !== "teacher")).map((item) => {
-            const Icon = item.icon;
-            return <button key={item.id} type="button" onClick={() => toast.error("Select SUBJECT First")} aria-disabled="true" data-testid={`locked-feature-${item.id}`} className="relative min-h-20 w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 pr-8 text-left opacity-75">
-              <div className="flex items-center gap-2 text-slate-500"><Icon size={16} /><span className="text-xs font-semibold">{item.label}</span></div><Lock aria-hidden="true" size={12} strokeWidth={2.5} className="absolute right-2.5 top-2.5 text-slate-800" />
-              <p className="mt-1 text-[10px] text-slate-400">Available after the selected subject dataset is expanded.</p>
-            </button>;
-          })}
-        </div>
       </div>
     </section>;
   }
