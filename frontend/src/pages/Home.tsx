@@ -511,6 +511,7 @@ function HomeLauncher({ user, onOpen }: { user: User; onOpen: (view: View) => vo
       </div>
     </div>
   </section>;
+  }
 }
 
 function StudentFeatureNotice({ feature, onClassroom }: { feature: string; onClassroom: () => void }) {
