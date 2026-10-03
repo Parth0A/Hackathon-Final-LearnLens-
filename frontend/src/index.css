@@ -141,24 +141,26 @@
 
 .animate-rise-in { animation: rise-in 420ms ease-out both; }
 
-/* LearnLens theme overrides. Theme selection is persisted locally per browser. */
+/* LearnLens theme overrides. Day/Night applies only to the main learning workspace. */
 html.theme-dark { color-scheme: dark; }
-html.theme-dark body { background-color: #0f172a !important; color: #e2e8f0 !important; background-image: radial-gradient(circle at 15% 0%, rgba(59, 130, 246, 0.10), transparent 24rem) !important; }
-html.theme-dark [class*="bg-[#FAF8F5]"],
-html.theme-dark [class*="bg-[#F3EFEA]"],
-html.theme-dark [class*="bg-white"] { background-color: #172033 !important; }
-html.theme-dark [class*="text-slate-900"] { color: #f8fafc !important; }
-html.theme-dark [class*="text-slate-800"] { color: #e2e8f0 !important; }
-html.theme-dark [class*="text-slate-700"] { color: #cbd5e1 !important; }
-html.theme-dark [class*="text-slate-600"] { color: #94a3b8 !important; }
-html.theme-dark [class*="text-slate-500"] { color: #94a3b8 !important; }
-html.theme-dark [class*="text-slate-400"] { color: #64748b !important; }
-html.theme-dark [class*="border-[#E2D9CE]"] { border-color: #334155 !important; }
-html.theme-dark [class*="border-[#CBD5E1]"] { border-color: #475569 !important; }
-html.theme-dark input, html.theme-dark textarea, html.theme-dark select { background-color: #111827 !important; color: #e2e8f0 !important; border-color: #475569 !important; }
-html.theme-dark [class*="bg-slate-50"] { background-color: #1e293b !important; }
-html.theme-dark [class*="bg-slate-100"] { background-color: #334155 !important; }
-html.theme-dark [class*="hover:bg-slate-50"]:hover { background-color: #1e293b !important; }
+html.theme-dark .theme-ui-surface { background-color: #0f172a !important; color: #e2e8f0 !important; border-radius: 1rem; }
+html.theme-dark .theme-ui-surface [class*="bg-[#FAF8F5]"],
+html.theme-dark .theme-ui-surface [class*="bg-[#F3EFEA]"],
+html.theme-dark .theme-ui-surface [class*="bg-white"] { background-color: #172033 !important; }
+html.theme-dark .theme-ui-surface [class*="text-slate-900"] { color: #f8fafc !important; }
+html.theme-dark .theme-ui-surface [class*="text-slate-800"] { color: #e2e8f0 !important; }
+html.theme-dark .theme-ui-surface [class*="text-slate-700"] { color: #cbd5e1 !important; }
+html.theme-dark .theme-ui-surface [class*="text-slate-600"],
+html.theme-dark .theme-ui-surface [class*="text-slate-500"] { color: #94a3b8 !important; }
+html.theme-dark .theme-ui-surface [class*="text-slate-400"] { color: #64748b !important; }
+html.theme-dark .theme-ui-surface [class*="border-[#E2D9CE]"] { border-color: #334155 !important; }
+html.theme-dark .theme-ui-surface [class*="border-[#CBD5E1]"] { border-color: #475569 !important; }
+html.theme-dark .theme-ui-surface input,
+html.theme-dark .theme-ui-surface textarea,
+html.theme-dark .theme-ui-surface select { background-color: #111827 !important; color: #e2e8f0 !important; border-color: #475569 !important; }
+html.theme-dark .theme-ui-surface [class*="bg-slate-50"] { background-color: #1e293b !important; }
+html.theme-dark .theme-ui-surface [class*="bg-slate-100"] { background-color: #334155 !important; }
+html.theme-dark .theme-ui-surface [class*="hover:bg-slate-50"]:hover { background-color: #1e293b !important; }
 
 
 /* Premium LearnLens geometric atmosphere — decorative only, never interactive. */
