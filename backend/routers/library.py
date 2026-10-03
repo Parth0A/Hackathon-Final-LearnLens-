@@ -63,7 +63,11 @@ async def create_note(payload: NoteCreateRequest, user: dict = Depends(require_u
         raise HTTPException(status_code=404, detail="Folder not found")
     now = now_iso()
     item = {"id": str(uuid4()), "owner_id": user["id"], "kind": "note", "name": payload.name, "content_type": "text/plain", "size": content_size, "folder_id": payload.folder_id, "favorite": False, "storage_path": None, "content": payload.content, "source_metadata": {"source": "Personal LearnLens note"}, "retrieval_status": "not_applicable", "is_deleted": False, "created_at": now, "updated_at": now}
-    await db.library_items.insert_one(item)
+    try:
+        await db.library_items.insert_one(item)
+    except Exception:
+        await delete_object(storage_path)
+        raise
     return item_model(item)
 
 
