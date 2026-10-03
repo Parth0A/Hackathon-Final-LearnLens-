@@ -8,7 +8,7 @@ from lib.db import db
 from models.access import FolderCreateRequest, LibraryFolder, LibraryItem, LibraryItemUpdate, NoteCreateRequest, StorageStatus
 from services.auth import require_user
 from services.seeding import now_iso
-from services.storage import APP_NAME, USER_QUOTA_BYTES, get_object, put_object, storage_enabled, validate_file
+from services.storage import APP_NAME, USER_QUOTA_BYTES, delete_object, get_object, put_object, storage_enabled, validate_file
 
 
 router = APIRouter(prefix="/library")
@@ -27,7 +27,7 @@ def item_model(item: dict[str, Any]) -> LibraryItem:
 async def storage_status(user: dict = Depends(require_user)) -> StorageStatus:
     used = await usage_for(user["id"])
     enabled = storage_enabled()
-    return StorageStatus(enabled=enabled, limit_bytes=USER_QUOTA_BYTES, used_bytes=used, message="Storage connected" if enabled else "File uploads are disabled until an Emergent storage key is provided. Notes and folders remain available.")
+    return StorageStatus(enabled=enabled, provider="MongoDB GridFS", limit_bytes=USER_QUOTA_BYTES, used_bytes=used, message="MongoDB storage connected")
 
 
 @router.get("/folders", response_model=list[LibraryFolder])
@@ -69,8 +69,6 @@ async def create_note(payload: NoteCreateRequest, user: dict = Depends(require_u
 
 @router.post("/upload", response_model=LibraryItem)
 async def upload_file(file: UploadFile = File(...), folder_id: str | None = None, user: dict = Depends(require_user)) -> LibraryItem:
-    if not storage_enabled():
-        raise HTTPException(status_code=503, detail="File storage is disabled until an Emergent integration key is provided")
     if folder_id and not await db.library_folders.find_one({"id": folder_id, "owner_id": user["id"]}):
         raise HTTPException(status_code=404, detail="Folder not found")
     content = await file.read()
@@ -105,9 +103,12 @@ async def update_item(item_id: str, payload: LibraryItemUpdate, user: dict = Dep
 
 @router.delete("/items/{item_id}", status_code=204)
 async def delete_item(item_id: str, user: dict = Depends(require_user)) -> None:
-    result = await db.library_items.update_one({"id": item_id, "owner_id": user["id"], "is_deleted": False}, {"$set": {"is_deleted": True, "updated_at": now_iso()}})
-    if result.matched_count == 0:
+    item = await db.library_items.find_one({"id": item_id, "owner_id": user["id"], "is_deleted": False})
+    if not item:
         raise HTTPException(status_code=404, detail="Library item not found")
+    if item.get("storage_path"):
+        await delete_object(item["storage_path"])
+    await db.library_items.update_one({"id": item_id}, {"$set": {"is_deleted": True, "updated_at": now_iso()}})
 
 
 @router.get("/items/{item_id}/download")
