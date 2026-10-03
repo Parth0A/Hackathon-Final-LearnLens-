@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from lib.db import db
+from services.auth import require_own_student, require_user
 
 router = APIRouter(prefix="/learning-debugger", tags=["learning-debugger"])
 
@@ -37,7 +38,8 @@ def _now() -> str:
 
 
 @router.get("/progress/{student_id}", response_model=DebuggerProgress)
-async def get_progress(student_id: str, subject: str = "Data Structures"):
+async def get_progress(student_id: str, subject: str = "Data Structures", user: dict = Depends(require_user)):
+    require_own_student(user, student_id)
     if subject not in SUBJECTS:
         raise HTTPException(status_code=400, detail="Unsupported subject")
 
@@ -65,7 +67,8 @@ async def get_progress(student_id: str, subject: str = "Data Structures"):
 
 
 @router.put("/progress/{student_id}", response_model=DebuggerProgress)
-async def save_progress(student_id: str, payload: ProgressPayload):
+async def save_progress(student_id: str, payload: ProgressPayload, user: dict = Depends(require_user)):
+    require_own_student(user, student_id)
     if payload.subject not in SUBJECTS:
         raise HTTPException(status_code=400, detail="Unsupported subject")
 
