@@ -18,6 +18,7 @@ from routers.auth import router as auth_router
 from routers.classrooms import router as classrooms_router
 from routers.library import router as library_router
 from routers.intelligence import router as intelligence_router
+from routers.learning_debugger import router as learning_debugger_router
 from services.seeding import ensure_seeded
 
 
@@ -46,6 +47,7 @@ api_router.include_router(library_router)
 api_router.include_router(classrooms_router)
 api_router.include_router(learning_router)
 api_router.include_router(intelligence_router)
+api_router.include_router(learning_debugger_router)
 
 # Include the router in the main app
 app.add_middleware(
