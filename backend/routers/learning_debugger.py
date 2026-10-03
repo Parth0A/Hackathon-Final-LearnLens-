@@ -1,6 +1,4 @@
 from datetime import datetime, timezone
-from typing import Literal
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
