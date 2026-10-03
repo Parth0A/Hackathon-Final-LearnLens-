@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Info, LogOut, Moon, Pencil, Sun, UserRound, X } from "lucide-react";
+import { Camera, Info, LogOut, Moon, Pencil, Sun, UserRound, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { apiPatch } from "@/lib/api";
+import { apiPatch, apiUpload } from "@/lib/api";
 import { endSession, sessionKey } from "@/lib/session";
 import type { User } from "@/lib/types";
 
@@ -20,6 +20,8 @@ export default function ProfileDrawer({ user }: { user: User }) {
   const [name, setName] = useState(user.name);
   const [className, setClassName] = useState(user.class_name ?? "");
   const [about, setAbout] = useState(user.about);
+  const [avatarUrl, setAvatarUrl] = useState(user.avatar_url ?? null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     try { return localStorage.getItem("learnlens-theme") === "dark" ? "dark" : "light"; } catch { return "light"; }
   });
@@ -35,6 +37,26 @@ export default function ProfileDrawer({ user }: { user: User }) {
     onSuccess: (updated) => { queryClient.setQueryData(sessionKey, updated); setEditing(false); toast.success("Profile updated"); },
     onError: () => toast.error("Profile changes could not be saved."),
   });
+
+  const uploadAvatar = async (file: File) => {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error("Use a JPG, PNG, or WebP image.");
+      return;
+    }
+    setAvatarUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const updated = await apiUpload<User>("/auth/profile/avatar", formData);
+      setAvatarUrl(updated.avatar_url ?? null);
+      queryClient.setQueryData(sessionKey, updated);
+      toast.success("Profile photo updated");
+    } catch {
+      toast.error("Profile photo could not be uploaded.");
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   const logout = async () => {
     await endSession();
@@ -53,7 +75,14 @@ export default function ProfileDrawer({ user }: { user: User }) {
           <SheetClose data-testid="profile-drawer-close-button" render={<Button variant="ghost" size="icon-sm" className="absolute right-4 top-4" aria-label="Close profile" />}><X size={17} /></SheetClose>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto p-5">
-          <div data-testid="profile-picture" className="flex size-20 items-center justify-center rounded-3xl bg-blue-600 font-heading text-2xl font-bold text-white shadow-sm">{initials}</div>
+          <div className="relative w-fit">
+            {avatarUrl ? <img data-testid="profile-picture" src={avatarUrl} alt={`${user.name} profile`} className="size-20 rounded-3xl object-cover shadow-sm" /> : <div data-testid="profile-picture" className="flex size-20 items-center justify-center rounded-3xl bg-blue-600 font-heading text-2xl font-bold text-white shadow-sm">{initials}</div>}
+            <label data-testid="profile-photo-upload-label" htmlFor="profile-photo-upload" className="absolute -bottom-2 -right-2 flex size-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-slate-900 text-white shadow-md transition hover:bg-blue-600">
+              <Camera size={14} />
+              <span className="sr-only">Add profile photo</span>
+            </label>
+            <input id="profile-photo-upload" data-testid="profile-photo-upload" type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={avatarUploading} onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadAvatar(file); event.currentTarget.value = ""; }} />
+          </div>
           <h2 data-testid="profile-name" className="mt-4 font-heading text-2xl font-bold text-slate-900">{user.name}</h2>
           <p data-testid="profile-role-status" className="mt-1 text-sm font-medium capitalize text-blue-700">{user.role}</p>
           <p data-testid="profile-class" className="mt-1 text-sm text-slate-500">{user.class_name || "No class set"}</p>
