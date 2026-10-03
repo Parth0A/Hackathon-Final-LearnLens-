@@ -468,62 +468,47 @@ function HomeLauncher({ user, onOpen }: { user: User; onOpen: (view: View) => vo
       { id: "library" as View, label: "Library X-Ray", description: "Analyze uploaded learning resources and question papers.", icon: SearchCheck },
       { id: "schedule-planner" as View, label: "Study Planner", description: "Plan study time independently of a selected subject.", icon: Clock3 },
     ];
-    return <section data-testid="home-launcher" className="animate-rise-in py-2 sm:py-6">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-6">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-blue-600">Student workspace</p>
-          <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight text-slate-900">Learning Debugger</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Select a subject to unlock the first diagnostic stage. Your debugger progress is saved so you can leave and continue later.</p>
-        </div>
-
-        <div data-testid="subjects-block" className="relative">
-          <div className="flex min-h-14 items-center rounded-2xl border border-slate-200 bg-white px-4 pr-2 shadow-sm ring-1 ring-slate-100">
-            <SearchCheck size={18} className="mr-3 shrink-0 text-slate-400" />
-            <span className="flex-1 text-sm font-medium text-slate-500">Select subject</span>
-            <button type="button" aria-label="Show subjects" aria-expanded={subjectOpen} onClick={() => setSubjectOpen((open) => !open)} className="flex size-10 items-center justify-center rounded-xl text-slate-500 transition hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-              <ChevronDown size={18} className={`transition-transform ${subjectOpen ? "rotate-180" : ""}`} />
-            </button>
+    return <section data-testid="home-launcher" aria-labelledby="home-launcher-title" className="animate-rise-in py-2 sm:py-6">
+    <div className="mx-auto max-w-5xl">
+      <Card data-testid="learning-debugger-core-card" className="overflow-hidden border-blue-200 bg-gradient-to-br from-blue-50 via-white to-indigo-50 shadow-[0_18px_45px_rgba(37,99,235,0.10)]">
+        <CardContent className="p-6 sm:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-blue-600 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-white">Core system</span>
+                <Badge variant="outline" className="border-blue-200 bg-white/80 text-blue-700">Learning recovery</Badge>
+              </div>
+              <h1 id="home-launcher-title" className="mt-4 font-heading text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Learning Debugger</h1>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
+                Find the learning gap, trace its root cause, recover the missing concept, and verify the recovery — one stage at a time.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2 text-xs font-medium text-slate-500">
+                <span className="rounded-full border border-blue-100 bg-white px-3 py-1.5">Detect</span>
+                <ArrowRight size={14} className="mt-1 text-blue-400" />
+                <span className="rounded-full border border-blue-100 bg-white px-3 py-1.5">Diagnose</span>
+                <ArrowRight size={14} className="mt-1 text-blue-400" />
+                <span className="rounded-full border border-blue-100 bg-white px-3 py-1.5">Recover</span>
+                <ArrowRight size={14} className="mt-1 text-blue-400" />
+                <span className="rounded-full border border-blue-100 bg-white px-3 py-1.5">Verify</span>
+              </div>
+            </div>
+            <Button data-testid="open-learning-debugger" size="lg" onClick={() => onOpen("learning-debugger")} className="min-w-48">
+              Open Learning Debugger <ArrowRight size={17} />
+            </Button>
           </div>
-          {subjectOpen ? <div className="mt-2 grid gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg">
-            {subjects.map((subject) => {
-              const available = subject === "Data Structures";
-              return <button key={subject} type="button" onClick={() => available ? onOpen("learning-debugger") : toast.error("Select Data Structures to begin the debugger")} data-testid={`subject-${subject.toLowerCase().replaceAll(" ", "-")}`} className={`flex min-h-12 items-center justify-between rounded-xl px-3 py-2 text-left transition ${available ? "bg-blue-50 text-blue-800 hover:bg-blue-100" : "cursor-not-allowed text-slate-400 hover:bg-slate-50"}`}>
-                <span className="text-sm font-medium">{subject}</span>
-                {available ? <Badge className="border-0 bg-blue-600 text-white">Available</Badge> : <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Coming later</span>}
-              </button>;
-            })}
-          </div> : null}
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="mt-6">
-          <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-slate-500">Available independently of subjects</p>
-          <div className="grid gap-4 sm:grid-cols-3">
-            {independent.map(({ id, label, description, icon: Icon }, index) => <button key={`${label}-${index}`} type="button" onClick={() => onOpen(id)} data-testid={`independent-feature-${index}`} className="group min-h-36 rounded-2xl border border-[#E2D9CE] bg-white p-5 text-left shadow-[0_8px_24px_rgba(30,41,59,0.04)] transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_12px_28px_rgba(37,99,235,0.08)]">
-              <span className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700 group-hover:bg-blue-600 group-hover:text-white"><Icon size={19} /></span>
-              <h2 className="mt-4 font-heading text-base font-bold text-slate-900">{label}</h2>
-              <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
-            </button>)}
-          </div>
-        </div>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            {featureItems.filter((item) => ["dashboard", "classrooms"].includes(item.id)).map((item) => {
-              const Icon = item.icon;
-              return <button key={item.id} type="button" onClick={() => onOpen(item.id)} data-testid={`available-feature-${item.id}`} className="group min-h-28 rounded-2xl border border-[#E2D9CE] bg-white p-5 text-left shadow-[0_8px_24px_rgba(30,41,59,0.04)] transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_12px_28px_rgba(37,99,235,0.08)]">
-                <span className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700 group-hover:bg-blue-600 group-hover:text-white"><Icon size={19} /></span>
-                <h2 className="mt-3 font-heading text-base font-bold text-slate-900">{item.label}</h2>
-                <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>
-              </button>;
-            })}
-          </div>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        {featureItems.filter((item) => ["dashboard", "library", "classrooms"].includes(item.id) && !(item.teacherOnly && user.role !== "teacher")).map((item) => {
+          const Icon = item.icon;
+          return <button key={item.id} type="button" onClick={() => onOpen(item.id)} data-testid={`available-feature-${item.id}`} className="group min-h-28 rounded-2xl border border-[#E2D9CE] bg-white p-5 text-left shadow-[0_8px_24px_rgba(30,41,59,0.04)] transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_12px_28px_rgba(37,99,235,0.08)]">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700 group-hover:bg-blue-600 group-hover:text-white"><Icon size={19} /></span>
+            <h2 className="mt-3 font-heading text-base font-bold text-slate-900">{item.label}</h2>
+            <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>
+          </button>;
+        })}
       </div>
-    </section>;
-  }
-
-  return <section data-testid="home-launcher" aria-labelledby="home-launcher-title" className="animate-rise-in py-2 sm:py-6">
-    <h1 id="home-launcher-title" className="sr-only">LearnLens Home</h1>
-    <div data-testid="home-feature-grid" className="mx-auto grid max-w-4xl grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">
-      {featureItems.map((item) => { const Icon = item.icon; const roleLimited = item.studentOnly && user.role === "teacher"; if (item.teacherOnly && user.role !== "teacher") return null; return <button key={item.id} data-testid={`home-feature-${item.id}`} onClick={() => onOpen(item.id)} className="group min-h-40 rounded-2xl border border-[#E2D9CE] bg-white p-5 text-left shadow-[0_8px_24px_rgba(30,41,59,0.04)] transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-blue-300 hover:shadow-[0_14px_30px_rgba(37,99,235,0.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:min-h-44 sm:p-6"><div className="flex items-start justify-between gap-2"><span className="flex size-11 items-center justify-center rounded-xl bg-blue-50 text-blue-700 transition-[background,color,transform] duration-200 group-hover:scale-105 group-hover:bg-blue-600 group-hover:text-white"><Icon size={21} /></span>{roleLimited ? <Badge variant="outline" className="border-slate-200 bg-slate-50 text-[10px] text-slate-500">Student</Badge> : null}</div><h2 className="mt-5 font-heading text-lg font-bold leading-tight text-slate-900 sm:text-xl">{item.label}</h2><p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm">{item.description}</p></button>; })}
     </div>
   </section>;
 }
