@@ -39,6 +39,7 @@ INDEXES: dict[str, list[IndexModel]] = {
     "resource_xrays": [IndexModel([("owner_id", ASCENDING), ("item_id", ASCENDING)], name="resource_xray_owner_item", unique=True)],
     "intelligence_tasks": [IndexModel([("student_id", ASCENDING), ("concept_id", ASCENDING)], name="intelligence_task_student_concept", unique=True)],
     "retention_actions": [IndexModel([("student_id", ASCENDING), ("concept_id", ASCENDING), ("status", ASCENDING)], name="retention_action_student_concept")],
+    "learning_debugger_progress": [IndexModel([("student_id", ASCENDING), ("subject", ASCENDING)], name="debugger_student_subject", unique=True)],
     "classrooms": [IndexModel([("id", ASCENDING)], name="classroom_id", unique=True), IndexModel([("code", ASCENDING)], name="classroom_code", unique=True), IndexModel([("owner_id", ASCENDING)], name="classroom_owner")],
     "classroom_memberships": [IndexModel([("classroom_id", ASCENDING), ("student_id", ASCENDING)], name="classroom_student", unique=True)],
     "classroom_assessments": [IndexModel([("classroom_id", ASCENDING), ("created_at", DESCENDING)], name="assessment_classroom_time")],
