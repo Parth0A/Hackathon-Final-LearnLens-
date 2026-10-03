@@ -32,6 +32,8 @@ const features: Feature[] = [
   { id: "admin", label: "Admin Console", description: "Review system capabilities, role controls and LearnLens administration tools.", icon: ShieldCheck, tone: "slate", roles: ["admin"] },
 ];
 
+const toneClasses: Record<string, string> = { blue: "bg-blue-500/15 text-blue-300", emerald: "bg-emerald-500/15 text-emerald-300", violet: "bg-violet-500/15 text-violet-300", cyan: "bg-cyan-500/15 text-cyan-300", indigo: "bg-indigo-500/15 text-indigo-300", amber: "bg-amber-500/15 text-amber-300", yellow: "bg-yellow-500/15 text-yellow-300", pink: "bg-pink-500/15 text-pink-300", teal: "bg-teal-500/15 text-teal-300", sky: "bg-sky-500/15 text-sky-300", slate: "bg-slate-500/15 text-slate-300" };
+
 const subjects = ["Data Structures", "Database Management Systems", "Operating Systems", "Computer Networks", "Object-Oriented Programming", "Mathematics", "Physics", "Chemistry"];
 
 export default function LearnLensRedesignHome({ user, onOpen }: { user: User; onOpen: (view: DashboardView) => void }) {
@@ -128,7 +130,7 @@ export default function LearnLensRedesignHome({ user, onOpen }: { user: User; on
               const Icon = item.icon;
               return (
                 <button key={item.id} type="button" onClick={() => onOpen(item.id)} className="group min-h-[165px] rounded-2xl border border-blue-400/20 bg-[#071122]/80 p-5 text-left transition duration-200 hover:-translate-y-1 hover:border-blue-400/50 hover:bg-[#0a172b] hover:shadow-[0_20px_55px_rgba(0,0,0,.25)]">
-                  <div className={`grid size-11 place-items-center rounded-xl bg-${item.tone}-500/15 text-${item.tone}-300 ring-1 ring-inset ring-white/10`}><Icon size={22} /></div>
+                  <div className={`grid size-11 place-items-center rounded-xl ring-1 ring-inset ring-white/10 ${toneClasses[item.tone]}`}><Icon size={22} /></div>
                   <div className="mt-5 flex items-start justify-between gap-3">
                     <div>
                       <h2 className="font-heading text-base font-bold text-white">{item.label}</h2>
