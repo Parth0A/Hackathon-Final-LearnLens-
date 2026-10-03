@@ -15,8 +15,9 @@ import ProfileDrawer from "@/components/ProfileDrawer";
 import LibraryView from "@/components/LibraryView";
 import ClassroomsView from "@/components/ClassroomsView";
 import LearningIntelligenceView from "@/components/LearningIntelligenceView";
+import LearningDebugger from "@/components/LearningDebugger";
 
-type View = "home" | "dashboard" | "assessment" | "stuck" | "recovery" | "path" | "library" | "schedule-planner" | "streak" | "classrooms" | "teacher" | "learning-intelligence";
+type View = "home" | "learning-debugger" | "dashboard" | "assessment" | "stuck" | "recovery" | "path" | "library" | "schedule-planner" | "streak" | "classrooms" | "teacher" | "learning-intelligence";
 
 const featureItems: { id: View; label: string; description: string; icon: typeof LayoutDashboard; studentOnly?: boolean; teacherOnly?: boolean }[] = [
   { id: "dashboard", label: "Dashboard", description: "Shows your current mastery, active gaps, progress, and next learning priorities.", icon: LayoutDashboard, studentOnly: true },
@@ -182,6 +183,7 @@ export default function Home({ user }: { user: User }) {
           ) : null}
           {dataUnavailable ? <div data-testid="backend-error-state" className="mb-5 flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"><AlertTriangle size={18} /> Unable to connect to learning service. The workspace is still available; retry the page when the service returns.</div> : null}
           {view === "home" ? <HomeLauncher user={user} onOpen={navigate} /> : null}
+          {user.role === "student" && view === "learning-debugger" ? <LearningDebugger user={user} onOpen={navigate} assessmentResult={assessmentResult} intervention={intervention} practiceCompleted={practiceCompleted} retestResult={retestResult} /> : null}
           {studentOnlyView ? <StudentFeatureNotice feature={featureItems.find((item) => item.id === view)?.label ?? "This feature"} onClassroom={() => setView("classrooms")} /> : null}
           {user.role === "student" && view === "dashboard" ? <DashboardView dashboard={dashboard} gap={gap} studentId={studentId} onStartAssessment={() => navigate("assessment")} onStuck={() => navigate("stuck")} /> : null}
           {user.role === "student" && view === "assessment" ? <AssessmentView assessment={assessment} assessmentIndex={assessmentIndex} answers={assessmentAnswers} result={assessmentResult} loading={startAssessment.isPending || submitAssessment.isPending} onAnswer={(questionId, answer) => setAssessmentAnswers((current) => ({ ...current, [questionId]: answer }))} onPrevious={() => setAssessmentIndex((current) => Math.max(0, current - 1))} onNext={() => setAssessmentIndex((current) => Math.min((assessment?.questions.length ?? 1) - 1, current + 1))} onStart={() => startAssessment.mutate()} onDemoAnswers={() => setAssessmentAnswers(Object.fromEntries((assessment?.questions ?? []).map((question) => [question.id, question.options[0]])))} onSubmit={() => submitAssessment.mutate()} onReview={() => navigate("stuck")} /> : null}
@@ -485,7 +487,7 @@ function HomeLauncher({ user, onOpen }: { user: User; onOpen: (view: View) => vo
           {subjectOpen ? <div className="mt-2 grid gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg">
             {subjects.map((subject) => {
               const available = subject === "Data Structures";
-              return <button key={subject} type="button" onClick={() => available ? onOpen("dashboard") : toast.error("Select SUBJECT First")} data-testid={`subject-${subject.toLowerCase().replaceAll(" ", "-")}`} className={`flex min-h-12 items-center justify-between rounded-xl px-3 py-2 text-left transition ${available ? "bg-blue-50 text-blue-800 hover:bg-blue-100" : "cursor-not-allowed text-slate-400 hover:bg-slate-50"}`}>
+              return <button key={subject} type="button" onClick={() => available ? onOpen("learning-debugger") : toast.error("Select Data Structures to begin the debugger")} data-testid={`subject-${subject.toLowerCase().replaceAll(" ", "-")}`} className={`flex min-h-12 items-center justify-between rounded-xl px-3 py-2 text-left transition ${available ? "bg-blue-50 text-blue-800 hover:bg-blue-100" : "cursor-not-allowed text-slate-400 hover:bg-slate-50"}`}>
                 <span className="text-sm font-medium">{subject}</span>
                 {available ? <Badge className="border-0 bg-blue-600 text-white">Available</Badge> : <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Coming later</span>}
               </button>;
