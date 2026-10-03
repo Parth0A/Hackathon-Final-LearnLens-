@@ -462,12 +462,6 @@ function AdminView() {
 function HomeLauncher({ user, onOpen }: { user: User; onOpen: (view: View) => void }) {
   if (user.role === "student") {
     const subjects = ["Data Structures", "Database Management Systems", "Operating Systems", "Computer Networks", "Object-Oriented Programming", "Mathematics", "Physics", "Chemistry"];
-    const [subjectOpen, setSubjectOpen] = useState(false);
-    const independent = [
-      { id: "library" as View, label: "Library", description: "Manage your personal notes and study resources.", icon: Library },
-      { id: "library" as View, label: "Library X-Ray", description: "Analyze uploaded learning resources and question papers.", icon: SearchCheck },
-      { id: "schedule-planner" as View, label: "Study Planner", description: "Plan study time independently of a selected subject.", icon: Clock3 },
-    ];
     return <section data-testid="home-launcher" aria-labelledby="home-launcher-title" className="animate-rise-in py-2 sm:py-6">
     <div className="mx-auto max-w-5xl">
       <Card data-testid="learning-debugger-core-card" className="overflow-hidden border-blue-200 bg-gradient-to-br from-blue-50 via-white to-indigo-50 shadow-[0_18px_45px_rgba(37,99,235,0.10)]">
@@ -512,8 +506,30 @@ function HomeLauncher({ user, onOpen }: { user: User; onOpen: (view: View) => vo
     </div>
   </section>;
   }
-}
 
+  return <section data-testid="home-launcher" aria-labelledby="home-launcher-title" className="animate-rise-in py-2 sm:py-6">
+    <div className="mx-auto max-w-5xl">
+      <Card data-testid="teacher-home-card" className="border-blue-200 bg-gradient-to-br from-blue-50 via-white to-indigo-50 shadow-[0_18px_45px_rgba(37,99,235,0.10)]">
+        <CardContent className="p-6 sm:p-8">
+          <Badge variant="outline" className="border-blue-200 bg-white/80 text-blue-700">Teacher workspace</Badge>
+          <h1 id="home-launcher-title" className="mt-4 font-heading text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Classroom Radar</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">Monitor classroom learning evidence, recurring gaps, student activity, and recovery progress from one workspace.</p>
+          <Button data-testid="open-teacher-dashboard" size="lg" className="mt-5" onClick={() => onOpen("teacher")}>Open Teacher Dashboard <ArrowRight size={17} /></Button>
+        </CardContent>
+      </Card>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        {featureItems.filter((item) => ["library", "classrooms"].includes(item.id)).map((item) => {
+          const Icon = item.icon;
+          return <button key={item.id} type="button" onClick={() => onOpen(item.id)} data-testid={"available-feature-" + item.id} className="group min-h-28 rounded-2xl border border-[#E2D9CE] bg-white p-5 text-left shadow-[0_8px_24px_rgba(30,41,59,0.04)] transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_12px_28px_rgba(37,99,235,0.08)]">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700 group-hover:bg-blue-600 group-hover:text-white"><Icon size={19} /></span>
+            <h2 className="mt-3 font-heading text-base font-bold text-slate-900">{item.label}</h2>
+            <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>
+          </button>;
+        })}
+      </div>
+    </div>
+  </section>;
+}
 function StudentFeatureNotice({ feature, onClassroom }: { feature: string; onClassroom: () => void }) {
   return <Card data-testid="student-feature-role-notice" className="mx-auto mt-10 max-w-xl border-amber-200 bg-amber-50"><CardContent className="p-7"><Users size={23} className="text-amber-700" /><h1 className="mt-4 font-heading text-2xl font-bold text-slate-900">{feature} is a student workspace.</h1><p className="mt-2 leading-7 text-slate-600">Teacher permissions keep personal student learning data private. Open Classroom Radar to create links, publish questions, and review your roster.</p><Button data-testid="role-notice-classroom-button" className="mt-5" onClick={onClassroom}>Open Classroom Radar <ArrowRight size={16} /></Button></CardContent></Card>;
 }
