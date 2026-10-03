@@ -493,7 +493,7 @@ function HomeLauncher({ user, onOpen }: { user: User; onOpen: (view: View) => vo
       </Card>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {featureItems.filter((item) => ["dashboard", "library", "classrooms"].includes(item.id) && !(item.teacherOnly && user.role !== "teacher")).map((item) => {
+        {featureItems.filter((item) => ["dashboard", "library", "schedule-planner", "classrooms"].includes(item.id) && !(item.teacherOnly && user.role !== "teacher")).map((item) => {
           const Icon = item.icon;
           return <button key={item.id} type="button" onClick={() => onOpen(item.id)} data-testid={`available-feature-${item.id}`} className="group min-h-28 rounded-2xl border border-[#E2D9CE] bg-white p-5 text-left shadow-[0_8px_24px_rgba(30,41,59,0.04)] transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-[0_12px_28px_rgba(37,99,235,0.08)]">
             <span className="flex size-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700 group-hover:bg-blue-600 group-hover:text-white"><Icon size={19} /></span>
