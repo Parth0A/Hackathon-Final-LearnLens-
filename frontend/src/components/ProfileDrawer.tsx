@@ -95,11 +95,19 @@ export default function ProfileDrawer({ user }: { user: User }) {
           </div> : null}
 
           <div className="mt-7 space-y-2">
-            <div data-testid="theme-section" className="mb-2 rounded-2xl border border-[#E2D9CE] bg-[#FAF8F5] p-3">
-              <p className="px-1 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">THEME</p>
-              <div className="grid grid-cols-2 gap-2">
-                <button type="button" data-testid="theme-light-button" aria-pressed={theme === "light"} onClick={() => setTheme("light")} className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition ${theme === "light" ? "border-blue-200 bg-white text-blue-700 shadow-sm" : "border-transparent text-slate-500 hover:bg-white/70"}`}><Sun size={15} /> LIGHT</button>
-                <button type="button" data-testid="theme-dark-button" aria-pressed={theme === "dark"} onClick={() => setTheme("dark")} className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition ${theme === "dark" ? "border-slate-600 bg-slate-800 text-white shadow-sm" : "border-transparent text-slate-500 hover:bg-white/70"}`}><Moon size={15} /> DARK</button>
+            <div data-testid="theme-section" className="mb-2 rounded-2xl border border-[#E2D9CE] bg-[#FAF8F5] p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Appearance</p>
+                  <p className="mt-1 text-xs text-slate-500">Change the learning workspace only.</p>
+                </div>
+                <button type="button" data-testid="theme-toggle" aria-label={theme === "light" ? "Switch to night mode" : "Switch to day mode"} aria-pressed={theme === "dark"} onClick={() => setTheme(theme === "light" ? "dark" : "light")} className={`relative h-12 w-[118px] shrink-0 overflow-hidden rounded-full border shadow-inner transition ${theme === "dark" ? "border-slate-600 bg-slate-900" : "border-slate-200 bg-slate-100"}`}>
+                  <span className={`absolute inset-y-1 flex size-10 items-center justify-center rounded-full bg-white shadow-md transition-transform duration-300 ${theme === "dark" ? "translate-x-[70px]" : "translate-x-1"}`}>
+                    {theme === "dark" ? <Moon size={18} className="text-blue-700" /> : <Sun size={18} className="text-amber-500" />}
+                  </span>
+                  <span className="absolute inset-y-0 left-3 flex items-center text-[10px] font-semibold text-slate-500">Day</span>
+                  <span className="absolute inset-y-0 right-3 flex items-center text-[10px] font-semibold text-blue-700">Night</span>
+                </button>
               </div>
             </div>
             <button data-testid="about-us-button" onClick={() => setAboutOpen((value) => !value)} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-700 transition-[background,color] hover:bg-slate-50"><Info size={17} className="text-slate-400" /> About Us</button>
