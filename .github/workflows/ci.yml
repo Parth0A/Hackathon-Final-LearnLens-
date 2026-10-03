@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      MONGO_URL: mongodb://127.0.0.1:27017
+      DB_NAME: learnlens_ci
+      DEMO_STUDENT_EMAIL: student@learnlens.test
+      DEMO_TEACHER_EMAIL: teacher@learnlens.test
+      DEMO_STUDENT_PASSWORD: LearnLensStudent123!
+      DEMO_TEACHER_PASSWORD: LearnLensTeacher123!
+      CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      DISABLE_HOT_RELOAD: "true"
+      DISABLE_VISUAL_EDITS: "true"
+      DISABLE_EMERGENT_OVERLAY: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install backend dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Backend tests
+        working-directory: backend
+        run: pytest -q
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Frontend typecheck and production build
+        working-directory: frontend
+        run: npm run build
+
+      - name: Install Playwright dependencies
+        working-directory: tests
+        run: npm install && npx playwright install --with-deps chromium
+
+      - name: Start backend
+        working-directory: backend
+        run: nohup python -m uvicorn server:app --host 127.0.0.1 --port 8001 > /tmp/learnlens-backend.log 2>&1 &
+
+      - name: Wait for backend
+        run: |
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8001/api/ >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/learnlens-backend.log
+          exit 1
+
+      - name: Start frontend
+        working-directory: frontend
+        run: nohup npm run start -- --host 127.0.0.1 > /tmp/learnlens-frontend.log 2>&1 &
+
+      - name: Wait for frontend
+        run: |
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/ >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/learnlens-frontend.log
+          exit 1
+
+      - name: E2E tests
+        working-directory: tests
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: tests/test-results
+          if-no-files-found: ignore
+
+      - name: Upload server logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-logs
+          path: /tmp/learnlens-*.log
+          if-no-files-found: ignore
