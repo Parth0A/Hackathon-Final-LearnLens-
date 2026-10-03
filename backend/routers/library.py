@@ -87,7 +87,11 @@ async def upload_file(file: UploadFile = File(...), folder_id: str | None = None
     now = now_iso()
     is_teacher_resource = user["role"] == "teacher"
     item = {"id": str(uuid4()), "owner_id": user["id"], "kind": "file", "name": file.filename or f"resource{extension}", "content_type": file.content_type or "application/octet-stream", "size": int(result.get("size", len(content))), "folder_id": folder_id, "favorite": False, "storage_path": result["path"], "content": None, "source_metadata": {"source": "Teacher-uploaded course material" if is_teacher_resource else "Personal student library", "original_filename": file.filename or "resource", "owner_role": user["role"]}, "retrieval_status": "ready_for_future_retrieval" if is_teacher_resource else "not_applicable", "is_deleted": False, "created_at": now, "updated_at": now}
-    await db.library_items.insert_one(item)
+    try:
+        await db.library_items.insert_one(item)
+    except Exception:
+        await delete_object(storage_path)
+        raise
     return item_model(item)
 
 
