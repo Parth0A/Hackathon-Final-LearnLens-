@@ -125,10 +125,12 @@ test.describe('student flows', () => {
     for (let step = 0; step < 9; step += 1) {
       await expect(option).toBeVisible({ timeout: 15_000 });
       await option.click();
+      await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeEnabled({ timeout: 5_000 });
       await page.getByRole('button', { name: 'Next', exact: true }).click();
     }
     await expect(option).toBeVisible({ timeout: 15_000 });
     await option.click();
+    await expect(option).toHaveClass(/border-blue-500/, { timeout: 5_000 });
     await expect(submit).toBeEnabled({ timeout: 10_000 });
     await submit.click();
 
