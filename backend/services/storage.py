@@ -19,7 +19,8 @@ from lib.db import db
 
 
 APP_NAME = "learnlens"
-USER_QUOTA_BYTES = 500 * 1024 * 1024
+STUDENT_QUOTA_BYTES = 150 * 1024 * 1024
+TEACHER_QUOTA_BYTES = 250 * 1024 * 1024
 MAX_FILE_BYTES = 50 * 1024 * 1024
 MAX_AVATAR_BYTES = 5 * 1024 * 1024
 ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ppt", ".pptx", ".doc", ".docx", ".txt", ".md", ".csv"}
