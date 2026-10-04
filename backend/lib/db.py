@@ -19,8 +19,8 @@ client = AsyncIOMotorClient(
     connectTimeoutMS=int(os.environ.get("MONGO_CONNECT_TIMEOUT_MS", "10000")),
     socketTimeoutMS=int(os.environ.get("MONGO_SOCKET_TIMEOUT_MS", "20000")),
 )
-# Motor can capture the import-time event loop; always resolve the loop at operation time
-# so Uvicorn, pytest-asyncio, and lifespan startup share the loop that is actually running.
+# Motor can capture an import-time event loop. Resolve it from the currently running
+# loop instead, so Uvicorn startup and pytest-asyncio use the loop that is actually active.
 client.get_io_loop = asyncio.get_running_loop
 db = client[os.environ["DB_NAME"]]
 
