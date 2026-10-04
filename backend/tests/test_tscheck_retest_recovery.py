@@ -2,6 +2,8 @@
 
 import pytest
 
+from services.curriculum import QUESTION_BY_ID
+
 pytestmark = pytest.mark.xdist_group(name="demo_student")
 
 PRACTICE_IDS = ["q09", "q10", "q30"]
@@ -17,7 +19,7 @@ def _reach_retest_unlocked(client) -> dict:
     started = client.post("/interventions/start", json={"student_id": "demo-student", "concept_id": "lifo"})
     intervention = started.json()
     client.post(f"/interventions/{intervention['id']}/complete", json={"completed": True, "result": "started_practice"})
-    all_questions = {q["id"]: q for q in client.get("/questions").json()}
+    all_questions = QUESTION_BY_ID
     for qid in PRACTICE_IDS:
         client.post("/practice/submit", json={"student_id": "demo-student", "intervention_id": intervention["id"], "question_id": qid, "selected_answer": all_questions[qid]["correct_answer"]})
     return intervention
