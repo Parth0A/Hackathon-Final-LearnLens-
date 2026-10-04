@@ -262,7 +262,7 @@ async def create_assessment(classroom_id: str, payload: ClassroomAssessmentCreat
     item = {"id": str(uuid4()), "classroom_id": classroom_id, "teacher_id": teacher["id"], "title": payload.title, "question_ids": payload.question_ids, "published": payload.published, "created_at": now_iso()}
     await db.classroom_assessments.insert_one(item)
     ordered = {question["id"]: question for question in questions}
-    return ClassroomAssessment(**item, questions=[Question(**ordered[qid]) for qid in payload.question_ids], submission_count=0)
+    return ClassroomAssessment(**item, questions=[PublicQuestion(**{key: ordered[qid][key] for key in ("id", "text", "options", "concept_id", "prerequisite_concept_id", "difficulty", "misconception_tag", "source")}) for qid in payload.question_ids], submission_count=0)
 
 
 @router.post("/assessments/{assessment_id}/submit", response_model=ClassroomAssessmentResult)
