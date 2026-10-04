@@ -68,7 +68,7 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm install
+        run: npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Frontend typecheck and production build
         working-directory: frontend
