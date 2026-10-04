@@ -78,6 +78,27 @@ jobs:
         working-directory: backend
 
       # 7. Build frontend
+      - name: Reset database before E2E
+        run: |
+          python - <<'PY'
+          import os
+          from pymongo import MongoClient
+          client = MongoClient(os.environ["MONGO_URL"])
+          client.drop_database(os.environ["DB_NAME"])
+          client.close()
+          PY
+          kill $(pgrep -f "uvicorn server:app" | head -n 1) || true
+          cd backend
+          uvicorn server:app --host 127.0.0.1 --port 8001 > /tmp/backend.log 2>&1 &
+          cd ..
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8001/api/health | grep -q '"mongo":"up"'; then
+              echo "backend reseeded and ready"; exit 0
+            fi
+            sleep 2
+          done
+          echo "backend did not recover after database reset"; cat /tmp/backend.log; exit 1
+
       - name: Frontend lint
         run: npm run lint
         working-directory: frontend
