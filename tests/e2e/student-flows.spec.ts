@@ -13,6 +13,7 @@ async function openAssessment(page: Page) {
   // Navigate() auto-starts the session, but the start card can render first.
   const start = page.getByTestId('start-assessment-button');
   if (await start.isVisible({ timeout: 3_000 }).catch(() => false)) {
+    await expect(start).toBeEnabled({ timeout: 20_000 });
     await start.click();
   }
   await expect(page.getByTestId('assessment-view')).toBeVisible({ timeout: 20_000 });
@@ -119,7 +120,7 @@ test.describe('student flows', () => {
     // Answer the short diagnosis until the submit control appears.
     const submit = page.getByRole('button', { name: 'Find my learning gap' });
     for (let step = 0; step < 20; step += 1) {
-      if (await submit.isVisible({ timeout: 2_000 }).catch(() => false)) break;
+      if (await submit.isEnabled({ timeout: 2_000 }).catch(() => false)) break;
       const option = view.locator('div.grid.gap-2 > button').first();
       await expect(option).toBeVisible({ timeout: 15_000 });
       await option.click();
