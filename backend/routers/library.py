@@ -8,7 +8,7 @@ from lib.db import db
 from models.access import FolderCreateRequest, LibraryFolder, LibraryItem, LibraryItemUpdate, NoteCreateRequest, StorageStatus
 from services.auth import require_user
 from services.seeding import now_iso
-from services.storage import APP_NAME, USER_QUOTA_BYTES, delete_object, get_object, put_object, storage_enabled, validate_file
+from services.storage import APP_NAME, STUDENT_QUOTA_BYTES, TEACHER_QUOTA_BYTES, delete_object, get_object, put_object, storage_enabled, validate_file
 
 
 router = APIRouter(prefix="/library")
@@ -19,6 +19,14 @@ async def usage_for(owner_id: str) -> int:
     return sum(int(item.get("size", 0)) for item in items)
 
 
+def quota_for(user: dict) -> int:
+    return TEACHER_QUOTA_BYTES if user.get("role") == "teacher" else STUDENT_QUOTA_BYTES
+
+
+def quota_message(user: dict) -> str:
+    return f"Your {quota_for(user) // (1024 * 1024)} MB Library limit has been reached"
+
+
 def item_model(item: dict[str, Any]) -> LibraryItem:
     return LibraryItem(**item)
 
@@ -27,7 +35,7 @@ def item_model(item: dict[str, Any]) -> LibraryItem:
 async def storage_status(user: dict = Depends(require_user)) -> StorageStatus:
     used = await usage_for(user["id"])
     enabled = storage_enabled()
-    return StorageStatus(enabled=enabled, limit_bytes=USER_QUOTA_BYTES, used_bytes=used, message="Storage connected" if enabled else "File uploads are temporarily unavailable. Notes and folders remain available.")
+    return StorageStatus(enabled=enabled, limit_bytes=quota_for(user), used_bytes=used, message="Storage connected" if enabled else "File uploads are temporarily unavailable. Notes and folders remain available.")
 
 
 @router.get("/folders", response_model=list[LibraryFolder])
@@ -57,8 +65,8 @@ async def list_items(search: str = Query(default="", max_length=100), folder_id:
 @router.post("/notes", response_model=LibraryItem)
 async def create_note(payload: NoteCreateRequest, user: dict = Depends(require_user)) -> LibraryItem:
     content_size = len(payload.content.encode())
-    if await usage_for(user["id"]) + content_size > USER_QUOTA_BYTES:
-        raise HTTPException(status_code=413, detail="Your 500 MB Library limit has been reached")
+    if await usage_for(user["id"]) + content_size > quota_for(user):
+        raise HTTPException(status_code=413, detail=quota_message(user))
     if payload.folder_id and not await db.library_folders.find_one({"id": payload.folder_id, "owner_id": user["id"]}):
         raise HTTPException(status_code=404, detail="Folder not found")
     now = now_iso()
@@ -78,7 +86,7 @@ async def upload_file(file: UploadFile = File(...), folder_id: str | None = None
         extension = validate_file(file.filename or "file", content)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    if await usage_for(user["id"]) + len(content) > USER_QUOTA_BYTES:
+    if await usage_for(user["id"]) + len(content) > quota_for(user):
         raise HTTPException(status_code=413, detail="Your 500 MB Library limit has been reached")
     storage_path = f"{APP_NAME}/uploads/{user['id']}/{uuid4()}{extension}"
     result = await put_object(storage_path, content, file.content_type or "application/octet-stream")
@@ -113,7 +121,7 @@ async def replace_item(item_id: str, file: UploadFile = File(...), user: dict = 
         extension = validate_file(file.filename or item["name"], content)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    if await usage_for(user["id"]) - int(item.get("size", 0)) + len(content) > USER_QUOTA_BYTES:
+    if await usage_for(user["id"]) - int(item.get("size", 0)) + len(content) > quota_for(user):
         raise HTTPException(status_code=413, detail="Your 500 MB Library limit has been reached")
     previous_path = item.get("storage_path")
     storage_path = f"{APP_NAME}/uploads/{user['id']}/{uuid4()}{extension}"
