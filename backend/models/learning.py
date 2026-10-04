@@ -229,6 +229,20 @@ class TeacherStudentActivity(BaseModel):
     learning_status: str
 
 
+class TeacherStudentDashboardRow(BaseModel):
+    student_id: str
+    name: str
+    tests_taken: int
+    latest_score: float
+    latest_test_at: str | None = None
+    gap: str | None = None
+    concept_cleared_percentage: float
+
+
+class TeacherStudentDashboardResponse(BaseModel):
+    students: list[TeacherStudentDashboardRow] = Field(default_factory=list)
+
+
 class TeacherOverviewResponse(BaseModel):
     students_enrolled: int
     active_now: int
