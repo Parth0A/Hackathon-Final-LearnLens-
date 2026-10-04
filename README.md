@@ -52,7 +52,7 @@ Stack becomes available
 - **Backend:** FastAPI, Python, Pydantic
 - **Database:** MongoDB
 - **Authentication:** HTTP-only session cookie with hashed passwords
-- **Storage:** MongoDB metadata plus Emergent object storage when enabled
+- **Storage:** MongoDB metadata plus MongoDB GridFS for Library files and profile avatars
 - **AI/RAG prototype seams:** deterministic mock AI provider and mock knowledge retriever
 - **Testing:** pytest for backend and Playwright for browser E2E tests
 
