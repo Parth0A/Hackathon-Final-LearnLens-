@@ -134,10 +134,10 @@ async def upload_profile_avatar(file: UploadFile = File(...), user: dict = Depen
         raise HTTPException(status_code=413, detail="Profile photos must be 2 MB or smaller.")
 
     extension = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}[file.content_type]
-    path = f"profiles/{user['id']}/avatar{extension}"
+    path = f"profiles/{user['id']}/avatar/{uuid4()}{extension}"
     old_path = user.get("avatar_path")
     await put_object(path, content, file.content_type)
-    if old_path and old_path != path:
+    if old_path:
         await delete_object(old_path)
 
     avatar_url = f"/api/auth/avatar/{user['id']}?v={int(datetime.now(timezone.utc).timestamp())}"
