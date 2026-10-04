@@ -67,7 +67,12 @@ async def create_session(user_id: str, response: Response, request: Request) -> 
         "created_at": now.isoformat(), "expires_at": expires.isoformat(),
     })
     is_secure = request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https"
-    response.set_cookie(COOKIE_NAME, token, max_age=SESSION_DAYS * 86400, httponly=True, secure=is_secure, samesite="lax", path="/")
+    same_site = os.environ.get("AUTH_COOKIE_SAMESITE", "lax").strip().lower()
+    if same_site not in {"lax", "strict", "none"}:
+        same_site = "lax"
+    if same_site == "none" and not is_secure:
+        same_site = "lax"
+    response.set_cookie(COOKIE_NAME, token, max_age=SESSION_DAYS * 86400, httponly=True, secure=is_secure, samesite=same_site, path="/")
 
 
 async def require_user(request: Request) -> dict[str, Any]:
