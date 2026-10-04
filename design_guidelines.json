@@ -1,0 +1,131 @@
+{
+  "project_title": "Learning Recovery & Debugging Platform",
+  "tagline": "Find the gap. Fix the gap. Prove the recovery.",
+  "context": "Education Web Application (Data Structures Recovery Platform)",
+  "app_type": "hybrid_fullstack",
+  "design_theme": "Calm, high-contrast education workspace with warm paper surfaces and crisp blue/emerald progress states",
+  "theme_tokens": {
+    "background_paper": "#FAF8F5",
+    "surface_card": "#FFFFFF",
+    "surface_card_muted": "#F3EFEA",
+    "text_primary": "#1E293B",
+    "text_secondary": "#64748B",
+    "border_subtle": "#E2D9CE",
+    "border_strong": "#CBD5E1",
+    "accent_primary_blue": "#2563EB",
+    "accent_primary_blue_hover": "#1D4ED8",
+    "accent_success_emerald": "#059669",
+    "accent_warning_amber": "#D97706",
+    "accent_error_rose": "#E11D48",
+    "gap_diagnostic_bg": "#FFF1F2",
+    "gap_diagnostic_border": "#FECDD3",
+    "gap_diagnostic_text": "#9F1239",
+    "mastery_recovered_bg": "#ECFDF5",
+    "mastery_recovered_border": "#A7F3D0",
+    "mastery_recovered_text": "#065F46"
+  },
+  "typography": {
+    "heading_font": "Instrument Sans / Plus Jakarta Sans",
+    "body_font": "DM Sans / Inter",
+    "code_font": "JetBrains Mono / IBM Plex Mono",
+    "h1_hero": "text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900",
+    "h2_section": "text-2xl sm:text-3xl font-semibold tracking-tight text-slate-800",
+    "h3_card": "text-lg sm:text-xl font-medium tracking-tight text-slate-900",
+    "body_regular": "text-base font-normal leading-relaxed text-slate-700",
+    "body_small": "text-sm font-normal text-slate-600",
+    "caption_mono": "font-mono text-xs uppercase tracking-wider text-slate-500"
+  },
+  "layout_architecture": {
+    "primary_navigation": [
+      { "id": "assessment", "label": "Diagnostic Assessment", "icon": "HelpCircle" },
+      { "id": "why_am_i_stuck", "label": "Why Am I Stuck?", "icon": "AlertTriangle", "badge": "Evidence Engine" },
+      { "id": "recovery_center", "label": "Recovery Center", "icon": "RefreshCw", "highlight": true },
+      { "id": "learning_path", "label": "Prerequisite Graph & Path", "icon": "GitFork" },
+      { "id": "student_dashboard", "label": "Student Dashboard", "icon": "LayoutDashboard" },
+      { "id": "teacher_radar", "label": "Teacher Classroom Radar", "icon": "Users" }
+    ],
+    "top_bar": {
+      "demo_student_indicator": "Active Profile: Demo Student (Alex Chen)",
+      "demo_mode_controls": "Reset Demo State button with instant notification toast",
+      "mock_badge": "PROTOTYPE: Mocked AI/RAG Engine"
+    }
+  },
+  "acceptance_journey_flow": [
+    "1. Diagnostic Assessment: Student answers 30-item realistic question bank on Data Structures (Arrays -> Linked List -> Stack -> Queue).",
+    "2. Repeated FIFO/LIFO Error Detection: System logs per-question evidence & detects confusion between Stack (LIFO) vs Queue (FIFO).",
+    "3. Root Gap Diagnosis: Debugger identifies LIFO fundamental node stack pointer concept as the exact root gap.",
+    "4. Why Am I Stuck Evidence: Presents concrete attempt history, prerequisite graph links, and misconception tags.",
+    "5. LIFO Intervention Engine: Selects targeted interactive tutorial + visual animation on Push/Pop stack operation.",
+    "6. Targeted Practice: 3 focused questions specifically testing LIFO state transition.",
+    "7. Retest & Recovery Threshold: Evaluates post-practice score against >=80% threshold.",
+    "8. Path Unlocked: Marks LIFO recovered, unlocks dependent Stack concepts, updates Dashboard & Teacher Radar.",
+    "9. Demo Reset: Allows immediate replay of the full acceptance loop."
+  ],
+  "component_design_specs": {
+    "QuestionCard": {
+      "style": "Warm paper card with clear question prompt, code snippet box (JetBrains Mono background #0F172A), radio selection options, data-testid='question-card'",
+      "action": "Immediate deterministic feedback + evidence collection"
+    },
+    "EvidenceDrawer": {
+      "style": "Side panel with amber/rose header, listing repeated misconceptions, prerequisite gap tree, and confidence scores, data-testid='evidence-drawer'"
+    },
+    "RecoveryCenter": {
+      "style": "High-contrast emerald/slate panel showcasing before/after mastery gauge, targeted 3-question practice widget, and retest trigger, data-testid='recovery-center'"
+    },
+    "PrerequisiteGraph": {
+      "style": "Interactive visual tree displaying node progression: Arrays -> Linked List (Node, Traversal, Insertion) -> LIFO (Stack: Push/Pop) -> FIFO (Queue: Enqueue/Dequeue)",
+      "statuses": ["mastered", "gap_detected", "locked", "in_recovery"]
+    },
+    "TeacherRadar": {
+      "style": "Classroom grid dashboard showing student cohort gaps, average recovery time, intervention effectiveness matrix, and flagged students"
+    }
+  },
+  "image_urls": [
+    {
+      "category": "student_studying",
+      "url": "https://images.unsplash.com/photo-1593698054469-2bb6fdf4b512?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzZ8MHwxfHNlYXJjaHwxfHxzdHVkZW50JTIwc3R1ZHlpbmclMjBlZHVjYXRpb24lMjBsZWFybmluZyUyMGRhdGElMjBzdHJ1Y3R1cmVzfGVufDB8fHx8MTc4OTk3MzY4MHww&ixlib=rb-4.1.0&q=85",
+      "description": "Student working on Data Structures learning recovery at desk"
+    },
+    {
+      "category": "learning_workspace",
+      "url": "https://images.pexels.com/photos/1181595/pexels-photo-1181595.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Education workspace desk with laptop and code notes"
+    },
+    {
+      "category": "math_logic_notes",
+      "url": "https://images.pexels.com/photos/6958530/pexels-photo-6958530.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Close-up of structured learning and problem solving"
+    }
+  ],
+  "testing_and_accessibility": {
+    "data_testid_policy": "All interactive elements (buttons, nav tabs, radio options, reset triggers, practice cards) MUST have data-testid in kebab-case format.",
+    "key_test_ids": [
+      "nav-assessment-tab",
+      "nav-stuck-tab",
+      "nav-recovery-tab",
+      "nav-path-tab",
+      "nav-dashboard-tab",
+      "nav-teacher-tab",
+      "demo-reset-button",
+      "submit-answer-button",
+      "start-intervention-button",
+      "start-retest-button",
+      "recovery-threshold-badge"
+    ],
+    "contrast_wcag": "All body text meets WCAG AA 4.5:1 on warm paper (#FAF8F5 / #FFFFFF). Buttons explicitly define text color on hover state."
+  },
+  "instructions_to_main_agent": [
+    "Maintain high-contrast warm paper design aesthetic using #FAF8F5 background, #FFFFFF cards, and 1px crisp borders.",
+    "Do NOT use purple gradients or generic dark AI assistant templates.",
+    "Implement full end-to-end working state for Demo Student in React + FastAPI + MongoDB.",
+    "Ensure every state transition in the acceptance journey is functional and reflected across Assessment, Why Am I Stuck, Recovery Center, Prerequisite Graph, Student Dashboard, and Teacher Radar.",
+    "Ensure all mock RAG and AI components have clear PROTOTYPE badges for architectural clarity."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Avoid generic centered layouts and uniform styling. Use warm paper surfaces with asymmetric bento cards.",
+    "Never use AI assistant Emoji characters like 🤖, 🧠, 💡 for UI icons; use lucide-react icons exclusively.",
+    "Add explicit hover, focus, and active micro-interactions to all interactive elements.",
+    "All interactive elements MUST include data-testid attributes for automated test validation.",
+    "Ensure header and overlays never use pure transparent backgrounds; use backdrop-blur or solid warm background."
+  ]
+}

@@ -1,0 +1,46 @@
+FREEbuff Changes Export — Change Manifest
+
+Generated: 2026-10-03 23:58 UTC
+Project: LearnLens (student + teacher workflow)
+Base: master branch, no commits yet (untracked working tree)
+
+=== MODIFIED (frontend source) ===
+modified	frontend/src/pages/Home.tsx
+modified	frontend/src/components/ClassroomsView.tsx
+modified	frontend/src/components/LibraryView.tsx
+modified	frontend/src/components/LearningIntelligenceView.tsx
+modified	frontend/src/components/ProfileDrawer.tsx
+modified	frontend/src/components/ui/badge.tsx
+modified	frontend/src/components/ui/button.tsx
+modified	frontend/src/components/ui/card.tsx
+modified	frontend/src/components/ui/input.tsx
+modified	frontend/src/components/ui/label.tsx
+modified	frontend/src/components/ui/sonner.tsx
+modified	frontend/src/lib/types.ts
+modified	frontend/src/lib/api.ts
+modified	frontend/src/lib/session.ts
+modified	frontend/src/lib/utils.ts
+modified	frontend/src/lib/queryClient.ts
+modified	frontend/src/lib/recharts.tsx
+modified	frontend/src/lib/lucide-react.tsx
+modified	frontend/src/index.css
+modified	frontend/src/App.tsx
+modified	frontend/src/main.tsx
+modified	frontend/src/pages/JoinClassroom.tsx
+modified	frontend/src/pages/Login.tsx
+modified	frontend/vite.config.ts
+modified	frontend/tsconfig.json
+modified	frontend/tsconfig.app.json
+modified	frontend/tsconfig.node.json
+modified	frontend/index.html
+modified	frontend/package.json
+
+=== NEWLY CREATED ===
+freebuff-changes-export/CHANGELOG.md
+freebuff-changes-export/CHANGE_MANIFEST.txt
+freebuff-changes-export/README.md
+freebuff-changes-export/frontend/CHANGELOG.md
+freebuff-changes-export/frontend/CHANGE_MANIFEST.txt
+
+=== DELETED ===
+(none — no source files were deleted)

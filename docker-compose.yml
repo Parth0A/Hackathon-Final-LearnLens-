@@ -1,0 +1,37 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      MONGO_URL: mongodb://mongo:27017
+      DB_NAME: learnlens
+      CORS_ORIGINS: http://localhost:8080
+      AUTH_COOKIE_NAME: learnlens_session
+      DEMO_STUDENT_EMAIL: student@learnlens.demo
+      DEMO_STUDENT_PASSWORD: LearnLens#Student1
+      DEMO_TEACHER_EMAIL: teacher@learnlens.demo
+      DEMO_TEACHER_PASSWORD: LearnLens#Teacher1
+      TEACHER_VERIFICATION_CODE: LearnLens#Teacher1
+    depends_on:
+      - mongo
+    ports:
+      - "8001:8001"
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  mongo-data:

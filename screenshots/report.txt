@@ -1,0 +1,24 @@
+
+[desktop/light] HOME  html="" bodyBg=rgb(250, 248, 245) heroBg=rgb(7, 17, 31) debuggerBg=oklab(0.97 -0.00371685 -0.0134976 / 0.6)
+  overflowX=0px pageHeight=1827px stats="63% / 1 / 2" debugger=true planner=true lockedTiles=5
+[desktop/light] DASH  bodyBg=rgb(250, 248, 245) focusBg=rgb(7, 17, 31) masteryBg=rgb(255, 255, 255)
+  overflowX=0px pageHeight=2034px status="A learning gap needs your attention" headers(glance=true, intelligence=true) startAssessment=true
+[desktop/light] STUCK overflowX=0px pageHeight=900px diagnosisBg=oklab(0.969 0.0146488 0.00322665 / 0.7) rootGap="Lifo" evidence=3
+[desktop/light] QUIZ overflowX=0px pageHeight=1022px options=4 selected=1 prompt="Which structure returns elements in last-in, f"
+
+[desktop/dark] HOME  html="dark theme-dark" bodyBg=rgb(6, 12, 26) heroBg=rgb(7, 17, 31) debuggerBg=rgba(37, 99, 235, 0.16)
+  overflowX=0px pageHeight=1827px stats="63% / 1 / 2" debugger=true planner=true lockedTiles=5
+[desktop/dark] DASH  bodyBg=rgb(6, 12, 26) focusBg=rgb(7, 17, 31) masteryBg=rgb(16, 26, 49)
+  overflowX=0px pageHeight=2034px status="A learning gap needs your attention" headers(glance=true, intelligence=true) startAssessment=true
+[desktop/dark] STUCK overflowX=0px pageHeight=900px diagnosisBg=rgba(225, 29, 72, 0.14) rootGap="Lifo" evidence=3
+[desktop/dark] QUIZ overflowX=0px pageHeight=1022px options=4 selected=1 prompt="Which structure returns elements in last-in, f"
+
+[mobile/light] HOME  html="" bodyBg=rgb(250, 248, 245) heroBg=rgb(7, 17, 31) debuggerBg=oklab(0.97 -0.00371685 -0.0134976 / 0.6)
+  overflowX=0px pageHeight=3049px stats="63% / 1 / 2" debugger=true planner=true lockedTiles=5
+[mobile/light] DASH  bodyBg=rgb(250, 248, 245) focusBg=rgb(7, 17, 31) masteryBg=rgb(255, 255, 255)
+  overflowX=0px pageHeight=4302px status="A learning gap needs your attention" headers(glance=true, intelligence=true) startAssessment=true
+
+[mobile/dark] HOME  html="dark theme-dark" bodyBg=rgb(6, 12, 26) heroBg=rgb(7, 17, 31) debuggerBg=rgba(37, 99, 235, 0.16)
+  overflowX=0px pageHeight=3049px stats="63% / 1 / 2" debugger=true planner=true lockedTiles=5
+[mobile/dark] DASH  bodyBg=rgb(6, 12, 26) focusBg=rgb(7, 17, 31) masteryBg=rgb(16, 26, 49)
+  overflowX=0px pageHeight=4302px status="A learning gap needs your attention" headers(glance=true, intelligence=true) startAssessment=true

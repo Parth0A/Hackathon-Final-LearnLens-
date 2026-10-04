@@ -1,0 +1,26 @@
+=== MongoDB Atlas reachability test ===
+exit: 0
+Microsoft Windows [Version 10.0.26200.9457]
+(c) Microsoft Corporation. All rights reserved.
+
+G:\Parth\Hackthon 1st\Fresh\Hackathon-Final-LearnLens--main>=== END OF PROBE HEADER ===
+--- MongoDB Atlas DNS SRV lookup ---
+Microsoft Windows [Version 10.0.26200.9457]
+(c) Microsoft Corporation. All rights reserved.
+
+G:\Parth\Hackthon 1st\Fresh\Hackathon-Final-LearnLens--main>--- DNS A lookup ---
+Microsoft Windows [Version 10.0.26200.9457]
+(c) Microsoft Corporation. All rights reserved.
+
+G:\Parth\Hackthon 1st\Fresh\Hackathon-Final-LearnLens--main>--- Connection (3 shards) ---
+Microsoft Windows [Version 10.0.26200.9457]
+(c) Microsoft Corporation. All rights reserved.
+
+G:\Parth\Hackthon 1st\Fresh\Hackathon-Final-LearnLens--main>Microsoft Windows [Version 10.0.26200.9457]
+(c) Microsoft Corporation. All rights reserved.
+
+G:\Parth\Hackthon 1st\Fresh\Hackathon-Final-LearnLens--main>--- TCP test via PowerShell ---
+Microsoft Windows [Version 10.0.26200.9457]
+(c) Microsoft Corporation. All rights reserved.
+
+G:\Parth\Hackthon 1st\Fresh\Hackathon-Final-LearnLens--main>
