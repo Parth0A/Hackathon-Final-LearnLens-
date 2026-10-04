@@ -19,6 +19,10 @@ async function openAssessment(page: Page) {
 /** Walk every question using the app's own "Load demo pattern" shortcut. */
 async function answerDemoPatternAndSubmit(page: Page) {
   await page.getByTestId('load-demo-answer-pattern-button').click();
+  // The shortcut fills every answer but does not change the current question.
+  for (let step = 0; step < 9; step += 1) {
+    await page.getByTestId('assessment-next-button').click();
+  }
   await page.getByTestId('submit-answer-button').click();
   await expect(page.getByTestId('assessment-result-view')).toBeVisible({ timeout: 20_000 });
 }
@@ -36,7 +40,7 @@ test.describe('student flows', () => {
     await expect(page.getByTestId('mastery-overview-card')).toBeVisible();
     // Metrics must be populated, not placeholders.
     const masteryValue = page.getByTestId('overall-mastery-card').locator('p').nth(1);
-    await expect(masteryValue).not.toHaveText('—');
+    await expect(masteryValue).toHaveText(/\d/ , { timeout: 20_000 });
   });
 
   test('learning debugger runs the diagnostic stage end to end', async ({ page }) => {
@@ -114,16 +118,18 @@ test.describe('student flows', () => {
     const view = page.getByTestId('schedule-planner-view');
     await expect(view).toBeVisible({ timeout: 15_000 });
 
-    // Answer the short diagnosis until the submit control appears.
+    // Answer the ten-question diagnosis deterministically: choose an option
+    // on each question, advance through the first nine, then submit the tenth.
     const submit = page.getByRole('button', { name: 'Find my learning gap' });
-    for (let step = 0; step < 20; step += 1) {
-      if (await submit.isEnabled({ timeout: 2_000 }).catch(() => false)) break;
-      const option = view.locator('div.grid.gap-2 > button').first();
+    const option = view.locator('div.grid.gap-2 > button').first();
+    for (let step = 0; step < 9; step += 1) {
       await expect(option).toBeVisible({ timeout: 15_000 });
       await option.click();
       await page.getByRole('button', { name: 'Next', exact: true }).click();
     }
-    await expect(submit).toBeVisible();
+    await expect(option).toBeVisible({ timeout: 15_000 });
+    await option.click();
+    await expect(submit).toBeEnabled({ timeout: 10_000 });
     await submit.click();
 
     // Step 2 — gap result, then step 3 — time budget, then step 4 — schedule.
