@@ -7,6 +7,9 @@ pytestmark = pytest.mark.xdist_group(name="demo_student")
 import os
 import uuid
 
+from services.curriculum import CONCEPTS, QUESTIONS
+QUESTION_BY_ID = {item["id"]: item for item in QUESTIONS}
+
 import pytest
 
 
