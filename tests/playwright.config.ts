@@ -6,7 +6,8 @@ export default defineConfig({
   outputDir: './test-results',
   timeout: 60_000,
   retries: 0,
-  workers: 2,
+  workers: 1,
+  fullyParallel: false,
   reporter: [
     ['list'],
     ['json', { outputFile: './test-results/results.json' }],
