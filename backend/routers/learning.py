@@ -13,7 +13,7 @@ from models.learning import (
     PathItem, PracticeResult, PracticeSubmission, Question, RadarResponse, ResetResponse,
     RetestResult, RetestSession, StartAssessmentRequest, StartInterventionRequest,
     StartRetestRequest, SubmitAssessmentRequest, SubmitRetestRequest, Student, PublicQuestion,
-    TeacherOverviewResponse, TeacherStudentActivity,
+    TeacherOverviewResponse, TeacherStudentActivity, TeacherStudentDashboardResponse, TeacherStudentDashboardRow,
 )
 from services.curriculum import ASSESSMENT_QUESTION_IDS, CONCEPT_BY_ID, PRACTICE_QUESTION_IDS, QUESTION_BY_ID, RETEST_QUESTION_IDS
 from services.debugger import diagnose_root_gap
@@ -518,6 +518,64 @@ async def teacher_overview(teacher: dict = Depends(require_role("teacher"))) -> 
         class_mastery=class_mastery,
         students=roster,
     )
+
+
+@router.get("/teacher/student-dashboard", response_model=TeacherStudentDashboardResponse)
+async def teacher_student_dashboard(teacher: dict = Depends(require_role("teacher"))) -> TeacherStudentDashboardResponse:
+    classrooms = await db.classrooms.find({"owner_id": teacher["id"]}).to_list(100)
+    classroom_ids = [item["id"] for item in classrooms]
+    if not classroom_ids:
+        return TeacherStudentDashboardResponse(students=[])
+
+    memberships = await db.classroom_memberships.find({"classroom_id": {"$in": classroom_ids}}).to_list(1000)
+    student_ids = sorted({item["student_id"] for item in memberships})
+    assessment_docs = await db.classroom_assessments.find({"classroom_id": {"$in": classroom_ids}, "published": True}).to_list(1000)
+    assessment_ids = [item["id"] for item in assessment_docs]
+    if not student_ids or not assessment_ids:
+        return TeacherStudentDashboardResponse(students=[])
+
+    results = await db.classroom_assessment_results.find({"assessment_id": {"$in": assessment_ids}, "student_id": {"$in": student_ids}}).sort("submitted_at", -1).to_list(5000)
+    if not results:
+        return TeacherStudentDashboardResponse(students=[])
+
+    students = {item["id"]: item for item in await db.students.find({"id": {"$in": student_ids}}).to_list(1000)}
+    assessment_names = {item["id"]: item.get("title", "Assessment") for item in assessment_docs}
+    gaps = await db.learning_gaps.find({"student_id": {"$in": student_ids}, "status": "active"}).to_list(5000)
+    gap_by_student = {}
+    for gap in gaps:
+        gap_by_student.setdefault(gap["student_id"], gap.get("root_gap") or gap.get("concept_id"))
+
+    states = await db.learning_states.find({"student_id": {"$in": student_ids}}).to_list(5000)
+    states_by_student = {}
+    for state in states:
+        states_by_student.setdefault(state["student_id"], []).append(state)
+
+    latest_by_student = {}
+    test_counts = {}
+    for result in results:
+        sid = result["student_id"]
+        test_counts[sid] = test_counts.get(sid, 0) + 1
+        latest_by_student.setdefault(sid, result)
+
+    rows = []
+    for sid, result in latest_by_student.items():
+        student_states = states_by_student.get(sid, [])
+        cleared = [item for item in student_states if float(item.get("mastery", 0.0)) >= 0.8]
+        cleared_percentage = round((len(cleared) / len(student_states)) * 100, 1) if student_states else 0.0
+        overall_mastery = round(sum(float(item.get("mastery", 0.0)) for item in student_states) / len(student_states), 4) if student_states else None
+        rows.append(TeacherStudentDashboardRow(
+            student_id=sid,
+            name=students.get(sid, {}).get("name", sid),
+            assessment=assessment_names.get(result["assessment_id"], "Assessment"),
+            tests_taken=test_counts[sid],
+            latest_score=float(result.get("score", 0.0)),
+            latest_test_at=result.get("submitted_at"),
+            gap=gap_by_student.get(sid),
+            concept_cleared_percentage=cleared_percentage,
+            mastery=overall_mastery,
+        ))
+    rows.sort(key=lambda item: item.latest_test_at or "", reverse=True)
+    return TeacherStudentDashboardResponse(students=rows)
 
 
 @router.post("/demo/reset", response_model=ResetResponse)
