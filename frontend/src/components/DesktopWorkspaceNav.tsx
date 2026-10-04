@@ -1,4 +1,4 @@
-import { BookOpen, BrainCircuit, ClipboardList, Home, LayoutDashboard, Library, Radar, ScanSearch, Sparkles } from "lucide-react";
+import { ClipboardList, Home, LayoutDashboard, Library, Radar, ScanSearch, Sparkles } from "lucide-react";
 import type { User } from "@/lib/types";
 
 type Props = {
@@ -19,12 +19,8 @@ const teacherItems = [
 const studentItems = [
   { id: "home", label: "Home", icon: Home },
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "assessment", label: "Learning Debugger", icon: BrainCircuit },
-  { id: "recovery", label: "Recovery Center", icon: BookOpen },
-  { id: "schedule-planner", label: "Study Planner", icon: ClipboardList },
   { id: "library", label: "Library", icon: Library },
   { id: "student-xray", label: "X-Ray", icon: ScanSearch, badge: "In Update" },
-  { id: "student-create-paper", label: "Create Paper", icon: Sparkles, badge: "Coming Soon" },
 ];
 
 export default function DesktopWorkspaceNav({ user, view, onNavigate }: Props) {
