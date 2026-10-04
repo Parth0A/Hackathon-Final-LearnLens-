@@ -96,5 +96,3 @@ credentials.json
 # Platform internals (environment-specific, not project code)
 .emergent/
 
-# CI workflow excluded until GitHub token has Workflows scope
-.github/workflows/
