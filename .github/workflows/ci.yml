@@ -101,6 +101,27 @@ jobs:
           done
           echo "frontend did not become ready"; cat /tmp/frontend.log; exit 1
 
+      # Reset the shared demo student after backend tests mutate its state.
+      - name: Reset demo state before E2E
+        run: |
+          python - <<'PY'
+          import os
+          import requests
+
+          session = requests.Session()
+          response = session.post(
+              "http://127.0.0.1:8001/api/auth/login",
+              json={
+                  "email": os.environ["DEMO_STUDENT_EMAIL"],
+                  "password": os.environ["DEMO_STUDENT_PASSWORD"],
+              },
+              timeout=30,
+          )
+          response.raise_for_status()
+          response = session.post("http://127.0.0.1:8001/api/demo/reset", timeout=30)
+          response.raise_for_status()
+          print("demo state reset")
+
       # 11. Run Playwright
       - name: Playwright E2E
         run: npx playwright test
