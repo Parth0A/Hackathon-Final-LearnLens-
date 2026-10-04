@@ -562,7 +562,7 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading }: { user: Use
               return <button key={item.id} type="button" onClick={() => toast.error("Select SUBJECT First")} aria-disabled="true" data-testid={`locked-feature-${item.id}`} className="group relative flex min-h-40 w-full cursor-not-allowed flex-col rounded-2xl border border-[#E2D9CE] bg-white p-4 text-left transition-colors duration-200 hover:border-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70">
                 <div className="flex items-start justify-between gap-2">
                   <span className="flex size-10 items-center justify-center rounded-xl bg-blue-600/10 text-blue-700 transition-colors duration-200 group-hover:bg-blue-600 group-hover:text-white"><Icon size={18} /></span>
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{stageLabel}</span>
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{stepLabel}</span>
                 </div>
                 <h3 className="mt-3 font-heading text-sm font-bold text-slate-900">{item.label}</h3>
                 <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>
