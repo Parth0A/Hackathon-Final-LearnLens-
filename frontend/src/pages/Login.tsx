@@ -68,6 +68,7 @@ export default function Login() {
   const [adminCode, setAdminCode] = useState("");
   const [educationType, setEducationType] = useState<"school" | "college">("college");
   const [demoBranch, setDemoBranch] = useState("Computer Science & Engineering");
+  const [academicSelection, setAcademicSelection] = useState("");
 
   const auth = useMutation({
     mutationFn: () =>
@@ -80,7 +81,7 @@ export default function Login() {
             password,
             name,
             role,
-            class_name: className || null,
+            class_name: className || academicSelection || null,
             teacher_verification_code: role === "teacher" ? verificationCode : null,
           }),
     onSuccess: (data) => { if (authPanel === "admin" && adminStep === "request") { setAdminStep("verify"); auth.reset(); return; } beginSession((data as AuthResponse).user); },
@@ -251,7 +252,7 @@ export default function Login() {
                         key={type}
                         type="button"
                         data-testid={`education-type-${type}`}
-                        onClick={() => setEducationType(type)}
+                        onClick={() => { setEducationType(type); setAcademicSelection(""); }}
                         className={`rounded-xl border px-3 py-2.5 text-sm font-semibold capitalize transition ${
                           educationType === type ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-500 hover:bg-slate-50"
                         }`}
@@ -262,24 +263,24 @@ export default function Login() {
                   </div>
                   {educationType === "school" ? (
                     <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
-                      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">School standards · demo preview</div>
+                      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">School grade</div>
                       <div className="grid grid-cols-4 gap-2">
                         {["3rd","4th","5th","6th","7th","8th","9th","10th"].map((grade) => (
-                          <button key={grade} type="button" disabled className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-400">{grade}</button>
+                          <button key={grade} type="button" onClick={() => { setAcademicSelection(grade); setClassName(grade); }} className={`rounded-lg border px-2 py-2 text-xs font-semibold transition ${academicSelection === grade ? "border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-100 shadow-sm" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>{grade}</button>
                         ))}
                       </div>
                     </div>
                   ) : (
                     <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
-                      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">College branches · demo preview</div>
+                      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">College course / branch</div>
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        {["Computer Science & Engineering","Information Technology","Electronics & Telecommunication","Electrical Engineering","Mechanical Engineering","Civil Engineering","Artificial Intelligence & Data Science","Artificial Intelligence & Machine Learning","Chemical Engineering","Biotechnology","Biomedical Engineering","Aerospace Engineering","Automobile Engineering","Instrumentation Engineering"].map((branch) => (
-                          <button key={branch} type="button" disabled={branch !== "Computer Science & Engineering"} onClick={() => setDemoBranch(branch)} className={`rounded-lg border px-3 py-2 text-left text-xs font-semibold transition ${
+                        {["MCA","Computer Science & Engineering","Information Technology","Electronics & Telecommunication","Electrical Engineering","Mechanical Engineering","Civil Engineering","Artificial Intelligence & Data Science","Artificial Intelligence & Machine Learning","Chemical Engineering","Biotechnology","Biomedical Engineering","Aerospace Engineering","Automobile Engineering","Instrumentation Engineering"].map((branch) => (
+                          <button key={branch} type="button" onClick={() => { setDemoBranch(branch); setAcademicSelection(branch); setClassName(branch); }} className={`rounded-lg border px-3 py-2 text-left text-xs font-semibold transition ${
                             branch === demoBranch ? "border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-100 shadow-sm" : "border-slate-200 bg-white text-slate-400"
                           }`}>{branch}</button>
                         ))}
                       </div>
-                      <p className="mt-2 text-[10px] text-slate-400">Demo only — additional branches are shown to illustrate broader LearnLens coverage.</p>
+                      <p className="mt-2 text-[10px] text-slate-400">Choose the course or branch that describes your learning path.</p>
                     </div>
                   )}
                 </div>
