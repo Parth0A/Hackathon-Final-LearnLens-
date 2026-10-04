@@ -56,7 +56,7 @@ def validate_image(filename: str, content: bytes) -> str:
 
 async def put_object(path: str, content: bytes, content_type: str) -> dict[str, Any]:
     """Store bytes in GridFS and return the opaque record fields callers persist."""
-    file_id = await bucket.upload_from_stream(
+    file_id = await _bucket().upload_from_stream(
         path,
         content,
         metadata={"content_type": content_type, "uploaded_at": datetime.now(timezone.utc).isoformat()},
