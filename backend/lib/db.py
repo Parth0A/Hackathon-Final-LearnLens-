@@ -1,5 +1,6 @@
 """Shared Mongo handle — import `client`/`db` from here (server.py, routers, seed.py)."""
 
+import asyncio
 import logging
 import os
 from pathlib import Path
@@ -18,6 +19,9 @@ client = AsyncIOMotorClient(
     connectTimeoutMS=int(os.environ.get("MONGO_CONNECT_TIMEOUT_MS", "10000")),
     socketTimeoutMS=int(os.environ.get("MONGO_SOCKET_TIMEOUT_MS", "20000")),
 )
+# Motor can capture the import-time event loop; always resolve the loop at operation time
+# so Uvicorn, pytest-asyncio, and lifespan startup share the loop that is actually running.
+client.get_io_loop = asyncio.get_running_loop
 db = client[os.environ["DB_NAME"]]
 
 logger = logging.getLogger(__name__)
