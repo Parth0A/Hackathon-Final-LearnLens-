@@ -69,6 +69,8 @@ export default function Login() {
   const [educationType, setEducationType] = useState<"school" | "college">("college");
   const [demoBranch, setDemoBranch] = useState("Computer Science & Engineering");
   const [academicSelection, setAcademicSelection] = useState("");
+  const [teacherDesignation, setTeacherDesignation] = useState("Professor");
+  const [teacherInstitute, setTeacherInstitute] = useState("");
 
   const auth = useMutation({
     mutationFn: () =>
@@ -81,7 +83,7 @@ export default function Login() {
             password,
             name,
             role,
-            class_name: className || academicSelection || null,
+            class_name: role === "teacher" ? [teacherDesignation, teacherInstitute.trim()].filter(Boolean).join(" · ") || null : className || academicSelection || null,
             teacher_verification_code: role === "teacher" ? verificationCode : null,
           }),
     onSuccess: (data) => { if (authPanel === "admin" && adminStep === "request") { setAdminStep("verify"); auth.reset(); return; } beginSession((data as AuthResponse).user); },
@@ -244,46 +246,64 @@ export default function Login() {
                   auth.mutate();
                 }}
               >
-                <div className="space-y-3">
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Education level</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(["school", "college"] as const).map((type) => (
-                      <button
-                        key={type}
-                        type="button"
-                        data-testid={`education-type-${type}`}
-                        onClick={() => { setEducationType(type); setAcademicSelection(""); }}
-                        className={`rounded-xl border px-3 py-2.5 text-sm font-semibold capitalize transition ${
+                {role === "student" ? (
+                  <div className="space-y-3">
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Education level</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(["school", "college"] as const).map((type) => (
+                        <button key={type} type="button" data-testid={`education-type-${type}`} onClick={() => { setEducationType(type); setAcademicSelection(""); }} className={`rounded-xl border px-3 py-2.5 text-sm font-semibold capitalize transition ${
                           educationType === type ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-500 hover:bg-slate-50"
-                        }`}
-                      >
-                        {type === "school" ? "School" : "College"}
-                      </button>
-                    ))}
+                        }`}>
+                          {type === "school" ? "School" : "College"}
+                        </button>
+                      ))}
+                    </div>
+                    {educationType === "school" ? (
+                      <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+                        <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">School standards · preview capability</div>
+                        <div className="grid grid-cols-4 gap-2">
+                          {["3rd","4th","5th","6th","7th","8th","9th","10th"].map((grade) => (
+                            <button key={grade} type="button" disabled className="cursor-default rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-400">{grade}</button>
+                          ))}
+                        </div>
+                        <p className="mt-2 text-[10px] text-slate-400">Displayed to show supported school standards; account setup does not depend on a selected grade.</p>
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+                        <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">College course / branch</div>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                          {["MCA","Computer Science & Engineering","Information Technology","Electronics & Telecommunication","Electrical Engineering","Mechanical Engineering","Civil Engineering","Artificial Intelligence & Data Science","Artificial Intelligence & Machine Learning","Chemical Engineering","Biotechnology","Biomedical Engineering","Aerospace Engineering","Automobile Engineering","Instrumentation Engineering"].map((branch) => (
+                            <button key={branch} type="button" onClick={() => { setDemoBranch(branch); setAcademicSelection(branch); setClassName(branch); }} className={`rounded-lg border px-3 py-2 text-left text-xs font-semibold transition ${
+                              branch === demoBranch ? "border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-100 shadow-sm" : "border-slate-200 bg-white text-slate-400"
+                            }`}>{branch}</button>
+                          ))}
+                        </div>
+                        <p className="mt-2 text-[10px] text-slate-400">Choose the course or branch that describes your learning path.</p>
+                      </div>
+                    )}
                   </div>
-                  {educationType === "school" ? (
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
-                      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">School grade</div>
-                      <div className="grid grid-cols-4 gap-2">
-                        {["3rd","4th","5th","6th","7th","8th","9th","10th"].map((grade) => (
-                          <button key={grade} type="button" onClick={() => { setAcademicSelection(grade); setClassName(grade); }} className={`rounded-lg border px-2 py-2 text-xs font-semibold transition ${academicSelection === grade ? "border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-100 shadow-sm" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>{grade}</button>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-4">
+                      <div className="text-sm font-semibold text-slate-900">Professional educator access</div>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">Use your institutional role and institute context. LearnLens keeps the teacher experience focused on classroom learning evidence.</p>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Professional role</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {["Professor","Assistant Professor","Lecturer / Teacher","HOD"].map((designation) => (
+                          <button key={designation} type="button" onClick={() => setTeacherDesignation(designation)} className={`rounded-xl border px-3 py-2.5 text-left text-xs font-semibold transition ${
+                            teacherDesignation === designation ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                          }`}>{designation}</button>
                         ))}
                       </div>
                     </div>
-                  ) : (
-                    <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
-                      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400">College course / branch</div>
-                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        {["MCA","Computer Science & Engineering","Information Technology","Electronics & Telecommunication","Electrical Engineering","Mechanical Engineering","Civil Engineering","Artificial Intelligence & Data Science","Artificial Intelligence & Machine Learning","Chemical Engineering","Biotechnology","Biomedical Engineering","Aerospace Engineering","Automobile Engineering","Instrumentation Engineering"].map((branch) => (
-                          <button key={branch} type="button" onClick={() => { setDemoBranch(branch); setAcademicSelection(branch); setClassName(branch); }} className={`rounded-lg border px-3 py-2 text-left text-xs font-semibold transition ${
-                            branch === demoBranch ? "border-blue-600 bg-blue-50 text-blue-700 ring-2 ring-blue-100 shadow-sm" : "border-slate-200 bg-white text-slate-400"
-                          }`}>{branch}</button>
-                        ))}
-                      </div>
-                      <p className="mt-2 text-[10px] text-slate-400">Choose the course or branch that describes your learning path.</p>
+                    <div>
+                      <label htmlFor="teacher-institute" className="mb-2 block text-sm font-semibold text-slate-800">Institute</label>
+                      <input id="teacher-institute" data-testid="teacher-institute-input" className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" value={teacherInstitute} onChange={(event) => setTeacherInstitute(event.target.value)} placeholder="School, college or university" />
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {mode === "login" ? (
                   <div>
@@ -362,21 +382,14 @@ export default function Login() {
                       </div>
                     </div>
 
-                    <div>
-                      <label htmlFor="register-class" className="mb-2 block text-sm font-semibold text-slate-800">
-                        Class / status <span className="font-normal text-slate-400">(optional)</span>
-                      </label>
-                      <input
-                        id="register-class"
-                        data-testid="register-class-input"
-                        className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-                        value={className}
-                        onChange={(event) => setClassName(event.target.value)}
-                        placeholder="e.g. Undergraduate · CSE-A"
-                      />
-                    </div>
+                    {role === "student" ? (
+                      <div>
+                        <label htmlFor="register-class" className="mb-2 block text-sm font-semibold text-slate-800">Class / status <span className="font-normal text-slate-400">(optional)</span></label>
+                        <input id="register-class" data-testid="register-class-input" className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" value={className} onChange={(event) => setClassName(event.target.value)} placeholder="e.g. Undergraduate · CSE-A" />
+                      </div>
+                    ) : null}
 
-                    {role === "teacher" ? (
+                    {role === "teacher" ? ( (
                       <div>
                         <label htmlFor="teacher-code" className="mb-2 block text-sm font-semibold text-slate-800">
                           Teacher verification code
