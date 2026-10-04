@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import asyncio
 import os
 from typing import Any
 
@@ -17,6 +18,7 @@ COHORT = [
 
 DEMO_TEACHER_ID = "demo-teacher"
 DEMO_CLASSROOM_ID = "demo-classroom"
+_seed_lock = asyncio.Lock()
 
 
 def now_iso() -> str:
@@ -100,6 +102,11 @@ async def seed_initial_states(student_id: str, reset: bool = False) -> None:
 
 
 async def ensure_seeded() -> None:
+    async with _seed_lock:
+        await _ensure_seeded()
+
+
+async def _ensure_seeded() -> None:
     await seed_reference_data()
     await seed_access_data()
     await seed_initial_states(DEMO_STUDENT["id"])
