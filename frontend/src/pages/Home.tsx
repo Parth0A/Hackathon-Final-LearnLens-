@@ -15,8 +15,11 @@ import ProfileDrawer from "@/components/ProfileDrawer";
 import LibraryView from "@/components/LibraryView";
 import ClassroomsView from "@/components/ClassroomsView";
 import LearningIntelligenceView from "@/components/LearningIntelligenceView";
+import DesktopWorkspaceNav from "@/components/DesktopWorkspaceNav";
+import DesktopXRayView from "@/components/DesktopXRayView";
+import TeacherStudentDashboardView from "@/components/TeacherStudentDashboardView";
 
-type View = "home" | "dashboard" | "assessment" | "stuck" | "recovery" | "path" | "library" | "schedule-planner" | "streak" | "classrooms" | "teacher" | "learning-intelligence";
+type View = "home" | "dashboard" | "assessment" | "stuck" | "recovery" | "path" | "library" | "schedule-planner" | "streak" | "classrooms" | "teacher" | "learning-intelligence" | "teacher-student-dashboard" | "teacher-xray" | "teacher-create-paper" | "student-xray" | "student-create-paper";
 
 const featureItems: { id: View; label: string; description: string; icon: typeof LayoutDashboard; studentOnly?: boolean; teacherOnly?: boolean }[] = [
   { id: "dashboard", label: "Dashboard", description: "Shows your current mastery, active gaps, progress, and next learning priorities.", icon: LayoutDashboard, studentOnly: true },
@@ -177,7 +180,9 @@ export default function Home({ user }: { user: User }) {
       </header>
 
       <div className="mx-auto max-w-6xl">
-        <main className="min-w-0 px-4 py-6 sm:px-6 lg:px-8 lg:py-9">
+        <div className="flex items-start gap-4 lg:gap-5">
+          <DesktopWorkspaceNav user={user} view={view} onNavigate={(nextView) => navigate(nextView as View)} />
+          <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-9">
           {view !== "home" ? (
             <button type="button" aria-label="Go back" data-testid="back-button" onClick={() => navigate("home")} className="mb-4 inline-flex size-9 items-center justify-center rounded-full border border-[#E2D9CE] bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
               <ChevronLeft size={17} />
@@ -197,7 +202,11 @@ export default function Home({ user }: { user: User }) {
           {user.role === "student" && view === "learning-intelligence" ? <LearningIntelligenceView user={user} onOpen={navigate} /> : null}
           {view === "classrooms" ? <ClassroomsView user={user} /> : null}
           {view === "teacher" ? <TeacherView radar={radarQuery.data} overview={overviewQuery.data} /> : null}
+          {user.role === "teacher" && view === "teacher-student-dashboard" ? <TeacherStudentDashboardView /> : null}
+          {(user.role === "teacher" && view === "teacher-xray") || (user.role === "student" && view === "student-xray") ? <DesktopXRayView user={user} onBack={() => setView("home")} /> : null}
+          {(user.role === "teacher" && view === "teacher-create-paper") || (user.role === "student" && view === "student-create-paper") ? <DesktopXRayView user={user} createPaper onBack={() => setView("home")} /> : null}
         </main>
+        </div>
       </div>
     </div>
   );
@@ -553,7 +562,7 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading }: { user: Use
               return <button key={item.id} type="button" onClick={() => toast.error("Select SUBJECT First")} aria-disabled="true" data-testid={`locked-feature-${item.id}`} className="group relative flex min-h-40 w-full cursor-not-allowed flex-col rounded-2xl border border-[#E2D9CE] bg-white p-4 text-left transition-colors duration-200 hover:border-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70">
                 <div className="flex items-start justify-between gap-2">
                   <span className="flex size-10 items-center justify-center rounded-xl bg-blue-600/10 text-blue-700 transition-colors duration-200 group-hover:bg-blue-600 group-hover:text-white"><Icon size={18} /></span>
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{stepLabel}</span>
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{stageLabel}</span>
                 </div>
                 <h3 className="mt-3 font-heading text-sm font-bold text-slate-900">{item.label}</h3>
                 <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>
