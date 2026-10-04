@@ -558,15 +558,26 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading }: { user: Use
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {debuggerFeatures.map((item, index) => {
               const Icon = item.icon;
-              const stepLabel = index < 4 ? String(index + 1).padStart(2, "0") : "CYCLE";
-              return <button key={item.id} type="button" onClick={() => toast.error("Select SUBJECT First")} aria-disabled="true" data-testid={`locked-feature-${item.id}`} className="group relative flex min-h-40 w-full cursor-not-allowed flex-col rounded-2xl border border-[#E2D9CE] bg-white p-4 text-left transition-colors duration-200 hover:border-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70">
+              const assessmentDone = Boolean(dashboard?.assessment_count);
+              const interventionStarted = Boolean(dashboard?.intervention_effectiveness.length);
+              const recoveryDone = Boolean(dashboard?.intervention_effectiveness.some((entry) => entry.result && entry.result !== "IN PROGRESS"));
+              const pathDone = Boolean(dashboard?.recovered_count);
+              const stageState = item.id === "assessment" ? (assessmentDone ? "completed" : "unlocked")
+                : item.id === "stuck" ? (interventionStarted ? "completed" : assessmentDone ? "unlocked" : "locked")
+                : item.id === "recovery" ? (recoveryDone ? "completed" : interventionStarted ? "unlocked" : "locked")
+                : item.id === "path" ? (pathDone ? "completed" : recoveryDone ? "unlocked" : "locked")
+                : (pathDone ? "unlocked" : "locked");
+              const stageLabel = index < 4 ? String(index + 1).padStart(2, "0") : "CYCLE";
+              const statusText = stageState === "completed" ? "Completed" : stageState === "unlocked" ? "Unlocked" : "Locked";
+              const canOpen = stageState !== "locked";
+              return <button key={item.id} type="button" onClick={() => canOpen ? onOpen(item.id) : toast.error("Complete the previous stage first")} aria-disabled={!canOpen} data-testid={`debugger-stage-${item.id}`} className={`group relative flex min-h-40 w-full flex-col rounded-2xl border border-[#E2D9CE] bg-white p-4 text-left transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 ${canOpen ? "hover:border-blue-400" : "cursor-not-allowed"}`}>
                 <div className="flex items-start justify-between gap-2">
-                  <span className="flex size-10 items-center justify-center rounded-xl bg-blue-600/10 text-blue-700 transition-colors duration-200 group-hover:bg-blue-600 group-hover:text-white"><Icon size={18} /></span>
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{stepLabel}</span>
+                  <span className={`flex size-10 items-center justify-center rounded-xl transition-colors duration-200 ${stageState === "completed" ? "bg-emerald-50 text-emerald-700" : stageState === "unlocked" ? "bg-blue-600/10 text-blue-700" : "bg-slate-100 text-slate-400"}`}><Icon size={18} /></span>
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{stageLabel}</span>
                 </div>
                 <h3 className="mt-3 font-heading text-sm font-bold text-slate-900">{item.label}</h3>
                 <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>
-                <span className="mt-3 inline-flex w-fit items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500"><Lock size={10} strokeWidth={2.5} /> Locked · subject first</span>
+                <span className={`mt-3 inline-flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${stageState === "completed" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : stageState === "unlocked" ? "border-blue-200 bg-blue-50 text-blue-700" : "border-slate-200 bg-slate-50 text-slate-500"}`}>{stageState === "completed" ? <CheckCircle2 size={10} /> : stageState === "unlocked" ? <ArrowRight size={10} /> : <Lock size={10} strokeWidth={2.5} />} {statusText}</span>
               </button>;
             })}
           </div>
