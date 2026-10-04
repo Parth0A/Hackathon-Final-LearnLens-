@@ -26,7 +26,9 @@ ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ppt", 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
 
 # GridFS bucket for the shared application database ("fs.files" / "fs.chunks").
-bucket = AsyncIOMotorGridFSBucket(db)
+def _bucket() -> AsyncIOMotorGridFSBucket:
+    """Create the GridFS bucket on the currently running asyncio loop."""
+    return AsyncIOMotorGridFSBucket(db)
 
 
 def storage_enabled() -> bool:
@@ -68,7 +70,7 @@ async def get_object(path: str) -> tuple[bytes, str]:
     except (InvalidId, TypeError):
         raise FileNotFoundError(path)
     try:
-        stream = await bucket.open_download_stream(file_id)
+        stream = await _bucket().open_download_stream(file_id)
     except NoFile:
         raise FileNotFoundError(path)
     data = await stream.read()
@@ -81,7 +83,7 @@ async def delete_object(path: str | None) -> None:
     if not path:
         return
     try:
-        await bucket.delete(ObjectId(path))
+        await _bucket().delete(ObjectId(path))
     except (InvalidId, TypeError, NoFile):
         return
     except Exception:
