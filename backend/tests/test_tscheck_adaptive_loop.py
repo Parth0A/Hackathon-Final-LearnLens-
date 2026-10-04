@@ -21,7 +21,7 @@ def _reach_retest_unlocked(client) -> dict:
     client.post(f"/interventions/{intervention['id']}/complete", json={"completed": True, "result": "started_practice"})
     all_questions = QUESTION_BY_ID
     for qid in PRACTICE_IDS:
-        client.post("/practice/submit", json={"student_id": "demo-student", "intervention_id": intervention["id"], "question_id": qid, "selected_answer": all_questions[qid]["correct_answer"]})
+        client.post("/practice/submit", json={"student_id": "demo-student", "intervention_id": intervention["id"], "question_id": qid, "selected_answer": QUESTION_BY_ID[qid]["correct_answer"]})
     return intervention
 
 
