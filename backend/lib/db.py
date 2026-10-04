@@ -34,6 +34,7 @@ INDEXES: dict[str, list[IndexModel]] = {
     "learning_history": [IndexModel([("student_id", ASCENDING), ("created_at", DESCENDING)], name="history_student_time")],
     "users": [IndexModel([("email", ASCENDING)], name="user_email", unique=True), IndexModel([("id", ASCENDING)], name="user_id", unique=True)],
     "sessions": [IndexModel([("token_hash", ASCENDING)], name="session_token", unique=True), IndexModel([("user_id", ASCENDING)], name="session_user")],
+    "security_rate_limits": [IndexModel([("key", ASCENDING)], name="rate_limit_key", unique=True)],
     "library_folders": [IndexModel([("owner_id", ASCENDING), ("created_at", DESCENDING)], name="folder_owner_time")],
     "library_items": [IndexModel([("owner_id", ASCENDING), ("is_deleted", ASCENDING), ("updated_at", DESCENDING)], name="library_owner_active_time")],
     "resource_xrays": [IndexModel([("owner_id", ASCENDING), ("item_id", ASCENDING)], name="resource_xray_owner_item", unique=True)],
