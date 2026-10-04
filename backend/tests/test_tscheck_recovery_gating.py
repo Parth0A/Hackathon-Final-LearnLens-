@@ -2,6 +2,8 @@
 
 import pytest
 
+from services.curriculum import QUESTION_BY_ID
+
 pytestmark = pytest.mark.xdist_group(name="demo_student")
 
 PRACTICE_IDS = ["q09", "q10", "q30"]
@@ -35,8 +37,8 @@ def test_intervention_content_is_deterministic_and_practice_gates_retest(client)
     blocked = client.post("/retest/start", json={"student_id": "demo-student", "concept_id": "lifo"})
     assert blocked.status_code == 409, blocked.text
 
-    all_questions = client.get("/questions").json()
-    qmap = {q["id"]: q for q in all_questions}
+    all_questions = list(QUESTION_BY_ID.values())
+    qmap = QUESTION_BY_ID
 
     for index, qid in enumerate(PRACTICE_IDS, start=1):
         answer = qmap[qid]["correct_answer"]
