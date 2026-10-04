@@ -36,8 +36,8 @@ export default function DesktopWorkspaceNav({ user, view, onNavigate }: Props) {
             const Icon = item.icon;
             const active = view === item.id;
             return (
-              <button key={item.id} type="button" data-testid={\`desktop-nav-\${item.id}\`} onClick={() => onNavigate(item.id)}
-                className={\`flex w-full items-center gap-2 rounded-xl px-2.5 py-2.5 text-left text-[11px] font-medium transition-colors \${active ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}\`}>
+              <button key={item.id} type="button" data-testid={`desktop-nav-${item.id}`} onClick={() => onNavigate(item.id)}
+                className={`flex w-full items-center gap-2 rounded-xl px-2.5 py-2.5 text-left text-[11px] font-medium transition-colors ${active ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}>
                 <Icon size={15} className="shrink-0" />
                 <span className="min-w-0 flex-1 truncate">{item.label}</span>
                 {item.badge ? <span className="shrink-0 rounded-full border border-blue-100 bg-blue-50 px-1.5 py-0.5 text-[7px] font-semibold text-blue-600">{item.badge}</span> : null}
