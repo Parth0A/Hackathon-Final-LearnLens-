@@ -71,7 +71,7 @@ def test_learning_debugger_recovers_lifo_and_unlocks_stack(client):
     start = client.post("/assessment/start", json={"student_id": student_id})
     assert start.status_code == 200, start.text
     questions = {item["id"]: item for item in start.json()["questions"]}
-    answers = [{"question_id": qid, "selected_answer": next(option for option in questions[qid]["options"] if option != questions[qid]["correct_answer"])} for qid in ("q08", "q09", "q10")]
+    answers = [{"question_id": qid, "selected_answer": next(option for option in questions[qid]["options"] if option != QUESTION_BY_ID[qid]["correct_answer"])} for qid in ("q08", "q09", "q10")]
     submitted = client.post("/assessment/submit", json={"student_id": student_id, "answers": answers})
     assert submitted.status_code == 200, submitted.text
     gap = submitted.json()["detected_gap"]
@@ -89,7 +89,7 @@ def test_learning_debugger_recovers_lifo_and_unlocks_stack(client):
     retest = client.post("/retest/start", json={"student_id": student_id, "concept_id": "lifo"})
     assert retest.status_code == 200, retest.text
     retest_questions = {item["id"]: item for item in retest.json()["questions"]}
-    retest_answers = [{"question_id": qid, "selected_answer": retest_questions[qid]["correct_answer"]} for qid in ("q11", "q29", "q32")]
+    retest_answers = [{"question_id": qid, "selected_answer": QUESTION_BY_ID[qid]["correct_answer"]} for qid in ("q11", "q29", "q32")]
     result = client.post("/retest/submit", json={"student_id": student_id, "retest_id": retest.json()["id"], "answers": retest_answers})
     assert result.status_code == 200, result.text
     body = result.json()
