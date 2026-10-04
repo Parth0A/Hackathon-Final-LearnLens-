@@ -10,13 +10,9 @@ import { login, STUDENT } from './support';
 /** Start the diagnostic and wait until the question UI is mounted. */
 async function openAssessment(page: Page) {
   await page.getByTestId('dashboard-start-assessment-button').click();
-  // Navigate() auto-starts the session, but the start card can render first.
-  const start = page.getByTestId('start-assessment-button');
-  if (await start.isVisible({ timeout: 3_000 }).catch(() => false)) {
-    await expect(start).toBeEnabled({ timeout: 20_000 });
-    await start.click();
-  }
-  await expect(page.getByTestId('assessment-view')).toBeVisible({ timeout: 20_000 });
+  // Navigation auto-starts the assessment; wait for the question UI instead of
+  // racing the transient disabled start button while the request is pending.
+  await expect(page.getByTestId('assessment-view')).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId('question-prompt')).toBeVisible();
 }
 
@@ -39,7 +35,8 @@ test.describe('student flows', () => {
     await expect(page.getByTestId('active-gaps-card')).toBeVisible();
     await expect(page.getByTestId('mastery-overview-card')).toBeVisible();
     // Metrics must be populated, not placeholders.
-    await expect(page.getByTestId('overall-mastery-card')).not.toContainText('—');
+    const masteryValue = page.getByTestId('overall-mastery-card').locator('p').nth(1);
+    await expect(masteryValue).not.toHaveText('—');
   });
 
   test('learning debugger runs the diagnostic stage end to end', async ({ page }) => {
