@@ -2,6 +2,8 @@
 
 import pytest
 
+from services.curriculum import QUESTION_BY_ID
+
 pytestmark = pytest.mark.xdist_group(name="demo_student")
 
 import os
@@ -68,7 +70,7 @@ def test_learning_debugger_recovers_lifo_and_unlocks_stack(client):
     start = client.post("/assessment/start", json={"student_id": student_id})
     assert start.status_code == 200, start.text
     questions = {item["id"]: item for item in start.json()["questions"]}
-    answers = [{"question_id": qid, "selected_answer": next(option for option in questions[qid]["options"] if option != questions[qid]["correct_answer"])} for qid in ("q08", "q09", "q10")]
+    answers = [{"question_id": qid, "selected_answer": next(option for option in QUESTION_BY_ID[qid]["options"] if option != QUESTION_BY_ID[qid]["correct_answer"])} for qid in ("q08", "q09", "q10")]
     submitted = client.post("/assessment/submit", json={"student_id": student_id, "answers": answers})
     assert submitted.status_code == 200, submitted.text
     gap = submitted.json()["detected_gap"]
@@ -80,7 +82,7 @@ def test_learning_debugger_recovers_lifo_and_unlocks_stack(client):
     completed = client.post(f"/interventions/{intervention_body['id']}/complete", json={"completed": True, "result": "practice_ready"})
     assert completed.status_code == 200, completed.text
     for qid in ("q09", "q10", "q30"):
-        practice = client.post("/practice/submit", json={"student_id": student_id, "intervention_id": intervention_body["id"], "question_id": qid, "selected_answer": questions.get(qid, {}).get("correct_answer") or {"q09": "LIFO", "q10": "C", "q30": "Stack → LIFO"}[qid]})
+        practice = client.post("/practice/submit", json={"student_id": student_id, "intervention_id": intervention_body["id"], "question_id": qid, "selected_answer": QUESTION_BY_ID[qid]["correct_answer"]})
         assert practice.status_code == 200, practice.text
     assert practice.json()["retest_unlocked"] is True
     retest = client.post("/retest/start", json={"student_id": student_id, "concept_id": "lifo"})
