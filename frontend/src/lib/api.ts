@@ -47,7 +47,7 @@ export const apiPatch = <T>(path: string, body?: JsonBody) =>
 export const apiDelete = <T>(path: string) => request<T>("DELETE", path);
 
 export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, { method: "POST", body: formData });
+  const res = await fetch(`${BASE}${path}`, { method: "POST", body: formData, credentials: "include" });
   if (!res.ok) {
     const errBody = await res.json().catch(() => null);
     throw new ApiError(res.status, errBody);
