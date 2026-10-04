@@ -43,6 +43,19 @@ jobs:
       - name: Install backend dependencies
         run: pip install -r backend/requirements.txt
 
+      - name: Start backend
+        working-directory: backend
+        run: nohup python -m uvicorn server:app --host 127.0.0.1 --port 8001 > /tmp/learnlens-backend.log 2>&1 &
+
+      - name: Wait for backend
+        run: |
+          for i in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8001/api/ >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/learnlens-backend.log
+          exit 1
+
       - name: Backend tests
         working-directory: backend
         run: pytest -q
