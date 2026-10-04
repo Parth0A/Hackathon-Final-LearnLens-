@@ -22,11 +22,12 @@ jobs:
     env:
       MONGO_URL: mongodb://127.0.0.1:27017
       DB_NAME: learnlens_ci
-      DEMO_STUDENT_EMAIL: student@learnlens.test
-      DEMO_TEACHER_EMAIL: teacher@learnlens.test
-      DEMO_STUDENT_PASSWORD: LearnLensStudent123!
-      DEMO_TEACHER_PASSWORD: LearnLensTeacher123!
+      DEMO_STUDENT_EMAIL: student@learnlens.demo
+      DEMO_TEACHER_EMAIL: teacher@learnlens.demo
+      DEMO_STUDENT_PASSWORD: LearnLens#Student1
+      DEMO_TEACHER_PASSWORD: LearnLens#Teacher1
       CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      REACT_APP_BACKEND_URL: http://127.0.0.1:8001
       DISABLE_HOT_RELOAD: "true"
       DISABLE_VISUAL_EDITS: "true"
       DISABLE_EMERGENT_OVERLAY: "true"
