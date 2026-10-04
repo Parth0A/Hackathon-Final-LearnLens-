@@ -5,6 +5,9 @@ import pytest
 pytestmark = pytest.mark.xdist_group(name="demo_student")
 
 PRACTICE_IDS = ["q09", "q10", "q30"]
+
+from services.curriculum import QUESTIONS
+QUESTION_BY_ID = {item["id"]: item for item in QUESTIONS}
 RETEST_IDS = ["q11", "q29", "q32"]
 
 
@@ -19,12 +22,12 @@ def _reach_retest_unlocked(client) -> dict:
     client.post(f"/interventions/{intervention['id']}/complete", json={"completed": True, "result": "started_practice"})
     all_questions = {q["id"]: q for q in client.get("/questions").json()}
     for qid in PRACTICE_IDS:
-        client.post("/practice/submit", json={"student_id": "demo-student", "intervention_id": intervention["id"], "question_id": qid, "selected_answer": all_questions[qid]["correct_answer"]})
+        client.post("/practice/submit", json={"student_id": "demo-student", "intervention_id": intervention["id"], "question_id": qid, "selected_answer": QUESTION_BY_ID[qid]["correct_answer"]})
     return intervention
 
 
 def _wrong_answer(question: dict) -> str:
-    return next(option for option in question["options"] if option != question["correct_answer"])
+    return next(option for option in question["options"] if option != QUESTION_BY_ID[question["id"]]["correct_answer"])
 
 
 def test_weak_retest_yields_not_recovered_and_next_intervention_is_different(client) -> None:
