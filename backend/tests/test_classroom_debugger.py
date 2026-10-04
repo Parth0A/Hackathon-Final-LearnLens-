@@ -2,6 +2,8 @@
 
 import uuid
 
+from services.curriculum import QUESTION_BY_ID
+
 
 def test_classroom_assessment_feeds_learning_debugger(teacher_client, client):
     suffix = uuid.uuid4().hex[:10]
