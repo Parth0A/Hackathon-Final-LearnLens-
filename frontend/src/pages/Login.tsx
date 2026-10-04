@@ -389,7 +389,7 @@ export default function Login() {
                       </div>
                     ) : null}
 
-                    {role === "teacher" ? ( (
+                    {role === "teacher" ? (
                       <div>
                         <label htmlFor="teacher-code" className="mb-2 block text-sm font-semibold text-slate-800">
                           Teacher verification code
