@@ -2,6 +2,9 @@
 
 import uuid
 
+from services.curriculum import QUESTIONS
+QUESTION_BY_ID = {item["id"]: item for item in QUESTIONS}
+
 
 def test_classroom_assessment_feeds_learning_debugger(teacher_client, client):
     suffix = uuid.uuid4().hex[:10]
@@ -59,7 +62,7 @@ def test_classroom_assessment_feeds_learning_debugger(teacher_client, client):
             "selected_answer": next(
                 option
                 for option in assessment_questions[qid]["options"]
-                if option != assessment_questions[qid]["correct_answer"]
+                if option != QUESTION_BY_ID[qid]["correct_answer"]
             ),
         }
         for qid in ("q08", "q09", "q10")
