@@ -26,7 +26,7 @@ def _reach_retest_unlocked(client) -> dict:
 
 
 def _wrong_answer(question: dict) -> str:
-    return next(option for option in question["options"] if option != question["correct_answer"])
+    return next(option for option in QUESTION_BY_ID[question["id"]]["options"] if option != QUESTION_BY_ID[question["id"]]["correct_answer"])
 
 
 def test_weak_retest_yields_not_recovered_and_next_intervention_is_different(client) -> None:
@@ -35,7 +35,7 @@ def test_weak_retest_yields_not_recovered_and_next_intervention_is_different(cli
 
     retest = client.post("/retest/start", json={"student_id": "demo-student", "concept_id": "lifo"})
     session = retest.json()
-    all_questions = {q["id"]: q for q in client.get("/questions").json()}
+    all_questions = QUESTION_BY_ID
     wrong_answers = [{"question_id": qid, "selected_answer": _wrong_answer(all_questions[qid])} for qid in RETEST_IDS]
     submit = client.post("/retest/submit", json={"student_id": "demo-student", "retest_id": session["id"], "answers": wrong_answers})
     assert submit.status_code == 200, submit.text
