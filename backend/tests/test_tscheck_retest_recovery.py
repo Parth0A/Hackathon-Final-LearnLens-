@@ -21,7 +21,7 @@ def _reach_retest_unlocked(client) -> dict:
     client.post(f"/interventions/{intervention['id']}/complete", json={"completed": True, "result": "started_practice"})
     all_questions = QUESTION_BY_ID
     for qid in PRACTICE_IDS:
-        client.post("/practice/submit", json={"student_id": "demo-student", "intervention_id": intervention["id"], "question_id": qid, "selected_answer": all_questions[qid]["correct_answer"]})
+        client.post("/practice/submit", json={"student_id": "demo-student", "intervention_id": intervention["id"], "question_id": qid, "selected_answer": QUESTION_BY_ID[qid]["correct_answer"]})
     return intervention
 
 
@@ -37,7 +37,7 @@ def test_three_correct_retest_answers_recover_lifo_and_unlock_stack(client) -> N
     assert len(session["questions"]) == 3
 
     all_questions = {q["id"]: q for q in client.get("/questions").json()}
-    answers = [{"question_id": qid, "selected_answer": all_questions[qid]["correct_answer"]} for qid in RETEST_IDS]
+    answers = [{"question_id": qid, "selected_answer": QUESTION_BY_ID[qid]["correct_answer"]} for qid in RETEST_IDS]
     submit = client.post("/retest/submit", json={"student_id": "demo-student", "retest_id": session["id"], "answers": answers})
     assert submit.status_code == 200, submit.text
     result = submit.json()
