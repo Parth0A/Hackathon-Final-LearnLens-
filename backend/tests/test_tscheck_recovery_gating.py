@@ -6,6 +6,9 @@ pytestmark = pytest.mark.xdist_group(name="demo_student")
 
 PRACTICE_IDS = ["q09", "q10", "q30"]
 
+from services.curriculum import QUESTIONS
+QUESTION_BY_ID = {item["id"]: item for item in QUESTIONS}
+
 
 def _seed_gap(client) -> None:
     client.post("/demo/reset")
@@ -39,7 +42,7 @@ def test_intervention_content_is_deterministic_and_practice_gates_retest(client)
     qmap = {q["id"]: q for q in all_questions}
 
     for index, qid in enumerate(PRACTICE_IDS, start=1):
-        answer = qmap[qid]["correct_answer"]
+        answer = QUESTION_BY_ID[qid]["correct_answer"]
         resp = client.post("/practice/submit", json={"student_id": "demo-student", "intervention_id": intervention["id"], "question_id": qid, "selected_answer": answer})
         assert resp.status_code == 200, resp.text
         body = resp.json()
