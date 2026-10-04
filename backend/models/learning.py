@@ -232,11 +232,13 @@ class TeacherStudentActivity(BaseModel):
 class TeacherStudentDashboardRow(BaseModel):
     student_id: str
     name: str
+    assessment: str
     tests_taken: int
     latest_score: float
     latest_test_at: str | None = None
     gap: str | None = None
     concept_cleared_percentage: float
+    mastery: float | None = None
 
 
 class TeacherStudentDashboardResponse(BaseModel):
