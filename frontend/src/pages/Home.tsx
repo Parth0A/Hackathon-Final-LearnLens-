@@ -63,6 +63,12 @@ export default function Home({ user }: { user: User }) {
   const [retest, setRetest] = useState<RetestSession | null>(null);
   const [retestAnswers, setRetestAnswers] = useState<Record<string, string>>({});
   const [retestResult, setRetestResult] = useState<RetestResult | null>(null);
+  const [selectedSubject, setSelectedSubject] = useState<string>(() => {
+    try { return localStorage.getItem(`learnlens-selected-subject-${studentId}`) ?? ""; } catch { return ""; }
+  });
+  const [stuckStageCompleted, setStuckStageCompleted] = useState<boolean>(() => {
+    try { return localStorage.getItem(`learnlens-stage2-${studentId}`) === "completed"; } catch { return false; }
+  });
 
   const dashboardQuery = useQuery({ queryKey: ["dashboard", studentId], queryFn: () => apiGet<DashboardResponse>(`/dashboard/${studentId}`), retry: 1, enabled: user.role === "student" });
   const gapQuery = useQuery({ queryKey: ["gaps", studentId], queryFn: () => apiGet<LearningGap[]>(`/gaps/${studentId}`), retry: 1, enabled: user.role === "student" });
@@ -104,7 +110,7 @@ export default function Home({ user }: { user: User }) {
       const rootGap = freshGaps[0]?.root_gap ?? "lifo";
       return apiPost<Intervention>("/interventions/start", { student_id: studentId, concept_id: rootGap });
     },
-    onSuccess: (data) => { setIntervention(data); setPracticeCompleted(0); setPracticeResults({}); setRetest(null); setRetestResult(null); setView("recovery"); },
+    onSuccess: (data) => { setIntervention(data); setPracticeCompleted(0); setPracticeResults({}); setRetest(null); setRetestResult(null); setStuckStageCompleted(true); try { localStorage.setItem(`learnlens-stage2-${studentId}`, "completed"); } catch { /* storage unavailable */ } setView("recovery"); },
     onError: (error: unknown) => {
       const detail = typeof error === "object" && error && "body" in error
         ? ((error as { body?: { detail?: string } }).body?.detail)
@@ -189,7 +195,7 @@ export default function Home({ user }: { user: User }) {
             </button>
           ) : null}
           {dataUnavailable ? <div data-testid="backend-error-state" className="mb-5 flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"><AlertTriangle size={18} /> Unable to connect to learning service. The workspace is still available; retry the page when the service returns.</div> : null}
-          {view === "home" ? <HomeLauncher user={user} onOpen={navigate} dashboard={dashboard} dashboardLoading={dashboardQuery.isLoading} /> : null}
+          {view === "home" ? <HomeLauncher user={user} onOpen={navigate} dashboard={dashboard} dashboardLoading={dashboardQuery.isLoading} selectedSubject={selectedSubject} setSelectedSubject={setSelectedSubject} stuckStageCompleted={stuckStageCompleted} /> : null}
           {studentOnlyView ? <StudentFeatureNotice feature={featureItems.find((item) => item.id === view)?.label ?? "This feature"} onClassroom={() => setView("classrooms")} /> : null}
           {user.role === "student" && view === "dashboard" ? <DashboardView dashboard={dashboard} gap={gap} studentId={studentId} onStartAssessment={() => navigate("assessment")} onStuck={() => navigate("stuck")} /> : null}
           {user.role === "student" && view === "assessment" ? <AssessmentView assessment={assessment} assessmentIndex={assessmentIndex} answers={assessmentAnswers} result={assessmentResult} loading={startAssessment.isPending || submitAssessment.isPending} onAnswer={(questionId, answer) => setAssessmentAnswers((current) => ({ ...current, [questionId]: answer }))} onPrevious={() => setAssessmentIndex((current) => Math.max(0, current - 1))} onNext={() => setAssessmentIndex((current) => Math.min((assessment?.questions.length ?? 1) - 1, current + 1))} onStart={() => startAssessment.mutate()} onDemoAnswers={() => setAssessmentAnswers(Object.fromEntries((assessment?.questions ?? []).map((question) => [question.id, question.options[0]])))} onSubmit={() => submitAssessment.mutate()} onReview={() => navigate("stuck")} /> : null}
@@ -480,7 +486,7 @@ function AdminView() {
   </section>;
 }
 
-function HomeLauncher({ user, onOpen, dashboard, dashboardLoading }: { user: User; onOpen: (view: View) => void; dashboard?: DashboardResponse; dashboardLoading?: boolean }) {
+function HomeLauncher({ user, onOpen, dashboard, dashboardLoading, selectedSubject, setSelectedSubject, stuckStageCompleted }: { user: User; onOpen: (view: View) => void; dashboard?: DashboardResponse; dashboardLoading?: boolean; selectedSubject: string; setSelectedSubject: (subject: string) => void; stuckStageCompleted: boolean }) {
   const [subjectOpen, setSubjectOpen] = useState(false);
   const subjectsRef = useRef<HTMLDivElement | null>(null);
 
@@ -545,7 +551,7 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading }: { user: Use
           {subjectOpen ? <div className="animate-rise-in mt-3 grid gap-1.5 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl ring-1 ring-slate-200/60">
             {subjects.map((subject) => {
               const available = subject === "Data Structures";
-              return <button key={subject} type="button" onClick={() => available ? onOpen("dashboard") : toast.error("Select SUBJECT First")} data-testid={`subject-${subject.toLowerCase().replaceAll(" ", "-")}`} className={`flex min-h-12 items-center justify-between rounded-xl px-3 py-2 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${available ? "bg-blue-50 text-blue-800 hover:bg-blue-100" : "cursor-not-allowed text-slate-400 hover:bg-slate-50"}`}>
+              return <button key={subject} type="button" onClick={() => { if (!available) { toast.error("Select SUBJECT First"); return; } setSelectedSubject(subject); try { localStorage.setItem(`learnlens-selected-subject-${user.student_id ?? ""}`, subject); } catch { /* storage unavailable */ } setSubjectOpen(false); }} data-testid={`subject-${subject.toLowerCase().replaceAll(" ", "-")}`} className={`flex min-h-12 items-center justify-between rounded-xl px-3 py-2 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${available ? "bg-blue-50 text-blue-800 hover:bg-blue-100" : "cursor-not-allowed text-slate-400 hover:bg-slate-50"}`}>
                 <span className="text-sm font-medium">{subject}</span>
                 {available ? <Badge className="border-0 bg-blue-600 text-white">Available</Badge> : <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Coming later</span>}
               </button>;
@@ -570,18 +576,27 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading }: { user: Use
             {debuggerFeatures.map((item, index) => {
               const Icon = item.icon;
               const stepLabel = index < 4 ? String(index + 1).padStart(2, "0") : "CYCLE";
-              return <button key={item.id} type="button" onClick={() => toast.error("Select SUBJECT First")} aria-disabled="true" data-testid={`locked-feature-${item.id}`} className="group relative flex min-h-40 w-full cursor-not-allowed flex-col rounded-2xl border border-[#E2D9CE] bg-white p-4 text-left transition-colors duration-200 hover:border-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70">
+              const stageOneCompleted = Boolean(dashboard?.assessment_count);
+              const unlocked = Boolean(selectedSubject) && (index === 0 || stageOneCompleted);
+              const completed = index === 0 ? stageOneCompleted : index === 1 ? stuckStageCompleted : false;
+              const locked = !unlocked;
+              return <button key={item.id} type="button" onClick={() => {
+                if (locked) {
+                  toast.error(selectedSubject ? "Complete the previous stage first" : "Select SUBJECT First");
+                  return;
+                }
+                onOpen(item.id);
+              }} aria-disabled={locked} data-testid={`locked-feature-${item.id}`} className={`group relative flex min-h-40 w-full flex-col rounded-2xl border p-4 text-left transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 ${locked ? "cursor-not-allowed border-[#E2D9CE] bg-white" : completed ? "border-emerald-200 bg-emerald-50/40 hover:border-emerald-400" : "cursor-pointer border-blue-200 bg-white hover:border-blue-400"}`}>
                 <div className="flex items-start justify-between gap-2">
-                  <span className="flex size-10 items-center justify-center rounded-xl bg-blue-600/10 text-blue-700 transition-colors duration-200 group-hover:bg-blue-600 group-hover:text-white"><Icon size={18} /></span>
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{stepLabel}</span>
+                  <span className={`flex size-10 items-center justify-center rounded-xl transition-colors duration-200 ${locked ? "bg-slate-100 text-slate-400" : completed ? "bg-emerald-100 text-emerald-700" : "bg-blue-600/10 text-blue-700 group-hover:bg-blue-600 group-hover:text-white"}`}><Icon size={18} /></span>
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">{completed ? "DONE" : stepLabel}</span>
                 </div>
                 <h3 className="mt-3 font-heading text-sm font-bold text-slate-900">{item.label}</h3>
                 <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>
-                <span className="mt-3 inline-flex w-fit items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500"><Lock size={10} strokeWidth={2.5} /> Locked · subject first</span>
+                <span className={`mt-3 inline-flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${completed ? "border-emerald-200 bg-emerald-50 text-emerald-700" : locked ? "border-slate-200 bg-slate-50 text-slate-500" : "border-blue-200 bg-blue-50 text-blue-700"}`}>{completed ? <CheckCircle2 size={10} /> : locked ? <Lock size={10} strokeWidth={2.5} /> : <ArrowRight size={10} />} {completed ? "Completed" : locked ? "Locked · previous stage" : "Unlocked · continue"}</span>
               </button>;
             })}
-          </div>
-        </div>
+          </div>       </div>
 
         <div className="mt-9">
           <div className="flex items-center gap-3">
@@ -621,14 +636,28 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading }: { user: Use
     </section>;
   }
 
+  const teacherFeatures: { id: View; label: string; description: string; icon: typeof LayoutDashboard }[] = [
+    { id: "classrooms", label: "Classroom Radar", description: "Monitor classroom learning evidence, recurring gaps, and recovery progress.", icon: School },
+    { id: "library", label: "Library", description: "Manage teacher learning resources and question-paper files.", icon: Library },
+    { id: "teacher-xray", label: "X-Ray", description: "Prepare papers for question-level analysis and learning evidence.", icon: SearchCheck },
+    { id: "teacher-student-dashboard", label: "Student Dashboard", description: "Review real student test results, scores, gaps, mastery, and concepts cleared.", icon: Users },
+    { id: "teacher", label: "Teacher Dashboard", description: "View classroom activity, learning gaps, mastery, and progress.", icon: LayoutDashboard },
+    { id: "teacher-create-paper", label: "Create Paper with LearnLens", description: "Create question papers from the teacher workspace.", icon: ClipboardCheck },
+  ];
+
   return <section data-testid="home-launcher" aria-labelledby="home-launcher-title" className="animate-rise-in py-2 sm:py-6">
     <h1 id="home-launcher-title" className="sr-only">LearnLens Home</h1>
     <div data-testid="home-feature-grid" className="mx-auto grid max-w-4xl grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">
-      {featureItems.map((item) => { const Icon = item.icon; const roleLimited = item.studentOnly && user.role === "teacher"; if (item.teacherOnly && user.role !== "teacher") return null; return <button key={item.id} data-testid={`home-feature-${item.id}`} onClick={() => onOpen(item.id)} className="group min-h-40 rounded-2xl border border-[#E2D9CE] bg-white p-5 text-left shadow-[0_8px_24px_rgba(30,41,59,0.04)] transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-blue-300 hover:shadow-[0_14px_30px_rgba(37,99,235,0.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:min-h-44 sm:p-6"><div className="flex items-start justify-between gap-2"><span className="flex size-11 items-center justify-center rounded-xl bg-blue-50 text-blue-700 transition-[background,color,transform] duration-200 group-hover:scale-105 group-hover:bg-blue-600 group-hover:text-white"><Icon size={21} /></span>{roleLimited ? <Badge variant="outline" className="border-slate-200 bg-slate-50 text-[10px] text-slate-500">Student</Badge> : null}</div><h2 className="mt-5 font-heading text-lg font-bold leading-tight text-slate-900 sm:text-xl">{item.label}</h2><p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm">{item.description}</p></button>; })}
+      {teacherFeatures.map((item) => {
+        const Icon = item.icon;
+        return <button key={item.id} data-testid={`home-feature-${item.id}`} onClick={() => onOpen(item.id)} className="group min-h-40 rounded-2xl border border-[#E2D9CE] bg-white p-5 text-left shadow-[0_8px_24px_rgba(30,41,59,0.04)] transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-1 hover:border-blue-300 hover:shadow-[0_14px_30px_rgba(37,99,235,0.09)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:min-h-44 sm:p-6">
+          <div className="flex items-start justify-between gap-2"><span className="flex size-11 items-center justify-center rounded-xl bg-blue-50 text-blue-700 transition-[background,color,transform] duration-200 group-hover:scale-105 group-hover:bg-blue-600 group-hover:text-white"><Icon size={21} /></span></div>
+          <h2 className="mt-5 font-heading text-lg font-bold leading-tight text-slate-900 sm:text-xl">{item.label}</h2>
+          <p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm">{item.description}</p>
+        </button>;
+      })}
     </div>
   </section>;
-}
-
 function StudentFeatureNotice({ feature, onClassroom }: { feature: string; onClassroom: () => void }) {
   return <Card data-testid="student-feature-role-notice" className="mx-auto mt-10 max-w-xl border-amber-200 bg-amber-50"><CardContent className="p-7"><Users size={23} className="text-amber-700" /><h1 className="mt-4 font-heading text-2xl font-bold text-slate-900">{feature} is a student workspace.</h1><p className="mt-2 leading-7 text-slate-600">Teacher permissions keep personal student learning data private. Open Classroom Radar to create links, publish questions, and review your roster.</p><Button data-testid="role-notice-classroom-button" className="mt-5" onClick={onClassroom}>Open Classroom Radar <ArrowRight size={16} /></Button></CardContent></Card>;
 }
