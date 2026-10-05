@@ -15,10 +15,13 @@ export async function gotoLogin(page: Page) {
   await expect(page.getByTestId('login-page')).toBeVisible();
 }
 
-export async function login(page: Page, creds: { email: string; password: string }) {
+export async function login(page: Page, creds: { email: string; password: string }, role: "student" | "teacher" = "student") {
   await gotoLogin(page);
   await page.getByTestId('auth-email-input').fill(creds.email);
   await page.getByTestId('auth-password-input').fill(creds.password);
+  if (role === "teacher") {
+    await page.getByTestId("auth-role-teacher").click();
+  }
   await page.getByTestId('auth-submit-button').click();
   await expect(page.getByTestId('home-launcher')).toBeVisible({ timeout: 15_000 });
 }
