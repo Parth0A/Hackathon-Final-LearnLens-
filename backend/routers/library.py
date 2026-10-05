@@ -87,7 +87,7 @@ async def upload_file(file: UploadFile = File(...), folder_id: str | None = None
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     if await usage_for(user["id"]) + len(content) > quota_for(user):
-        raise HTTPException(status_code=413, detail="Your 500 MB Library limit has been reached")
+        raise HTTPException(status_code=413, detail=quota_message(user))
     storage_path = f"{APP_NAME}/uploads/{user['id']}/{uuid4()}{extension}"
     result = await put_object(storage_path, content, file.content_type or "application/octet-stream")
     now = now_iso()
