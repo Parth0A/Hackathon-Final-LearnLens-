@@ -379,11 +379,22 @@ function SchedulePlannerView({ user }: { user: User }) {
 
   useEffect(() => {
     if (!studentId) return;
+    let cancelled = false;
     setLoading(true);
     apiPost<AssessmentSession>("/assessment/start", { student_id: studentId })
-      .then((data) => { setSession(data); setAnswers(Object.fromEntries(data.questions.map((q) => [q.id, ""]))); })
-      .catch(() => setError("Unable to start the learning diagnosis."))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        if (cancelled) return;
+        setSession(data);
+        setIndex(0);
+        setAnswers(Object.fromEntries(data.questions.map((q) => [q.id, ""])));
+      })
+      .catch(() => {
+        if (!cancelled) setError("Unable to start the learning diagnosis.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
   }, [studentId]);
 
   const current = session?.questions[index];
