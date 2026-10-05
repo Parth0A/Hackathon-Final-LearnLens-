@@ -3,7 +3,7 @@ import { login, TEACHER } from './support';
 
 test.describe('teacher flows', () => {
   test.beforeEach(async ({ page }) => {
-    await login(page, TEACHER);
+    await login(page, TEACHER, "teacher");
   });
 
   test('teacher launcher shows the feature grid', async ({ page }) => {

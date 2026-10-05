@@ -28,6 +28,7 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    role: Literal["student", "teacher"] = "student"
 
 
 class ProfileUpdateRequest(BaseModel):

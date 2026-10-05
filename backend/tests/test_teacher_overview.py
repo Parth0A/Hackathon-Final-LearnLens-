@@ -10,10 +10,10 @@ TEACHER = {"email": os.environ.get("DEMO_TEACHER_EMAIL", ""), "password": os.env
 STUDENT = {"email": os.environ.get("DEMO_STUDENT_EMAIL", ""), "password": os.environ.get("DEMO_STUDENT_PASSWORD", "")}
 
 
-def _login(creds: dict) -> httpx.Client:
+def _login(creds: dict, role: str) -> httpx.Client:
     assert creds["email"] and creds["password"], "Missing DEMO_TEACHER_/DEMO_STUDENT_ test credentials"
     session = httpx.Client(base_url=API_URL, timeout=15)
-    response = session.post("/auth/login", json=creds)
+    response = session.post("/auth/login", json={**creds, "role": role})
     assert response.status_code == 200, response.text
     return session
 
@@ -24,14 +24,14 @@ def test_overview_requires_auth():
 
 
 def test_overview_forbidden_for_student():
-    session = _login(STUDENT)
+    session = _login(STUDENT, "student")
     response = session.get("/teacher/overview")
     assert response.status_code == 403
     assert "Teacher" in response.json().get("detail", "")
 
 
 def test_overview_shape_and_values_for_teacher():
-    session = _login(TEACHER)
+    session = _login(TEACHER, "teacher")
     response = session.get("/teacher/overview")
     assert response.status_code == 200, response.text
     data = response.json()
@@ -54,7 +54,7 @@ def test_overview_shape_and_values_for_teacher():
 
 
 def test_overview_active_now_consistency():
-    session = _login(TEACHER)
+    session = _login(TEACHER, "teacher")
     response = session.get("/teacher/overview")
     data = response.json()
     active_from_roster = sum(1 for x in data["students"] if x["active"])

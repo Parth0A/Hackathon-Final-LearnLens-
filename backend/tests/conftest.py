@@ -35,7 +35,8 @@ def _login(c: httpx.Client, email_env: str, password_env: str) -> None:
     password = os.environ.get(password_env)
     if not email or not password:
         pytest.fail(f"Missing {email_env}/{password_env} test credentials")
-    response = c.post("/auth/login", json={"email": email, "password": password})
+    role = "teacher" if "TEACHER" in email_env else "student"
+    response = c.post("/auth/login", json={"email": email, "password": password, "role": role})
     assert response.status_code == 200, response.text
 
 
