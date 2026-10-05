@@ -20,7 +20,7 @@ export async function login(page: Page, creds: { email: string; password: string
   await page.getByTestId('auth-email-input').fill(creds.email);
   await page.getByTestId('auth-password-input').fill(creds.password);
   if (role === "teacher") {
-    await page.getByTestId("auth-role-teacher").click();
+    await page.getByTestId("login-role-teacher").click();
   }
   await page.getByTestId('auth-submit-button').click();
   await expect(page.getByTestId('home-launcher')).toBeVisible({ timeout: 15_000 });
