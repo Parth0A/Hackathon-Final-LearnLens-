@@ -577,8 +577,15 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading, selectedSubje
               const Icon = item.icon;
               const stepLabel = index < 4 ? String(index + 1).padStart(2, "0") : "CYCLE";
               const stageOneCompleted = Boolean(dashboard?.assessment_count);
-              const unlocked = Boolean(selectedSubject) && (index === 0 || stageOneCompleted);
-              const completed = index === 0 ? stageOneCompleted : index === 1 ? stuckStageCompleted : false;
+              const stageTwoCompleted = stuckStageCompleted;
+              const stageThreeCompleted = Boolean(dashboard?.recovered_count);
+              const unlocked = Boolean(selectedSubject) && (
+                index === 0 ||
+                (index === 1 && stageOneCompleted) ||
+                (index === 2 && stageTwoCompleted) ||
+                (index >= 3 && stageThreeCompleted)
+              );
+              const completed = index === 0 ? stageOneCompleted : index === 1 ? stageTwoCompleted : index === 2 ? stageThreeCompleted : false;
               const locked = !unlocked;
               return <button key={item.id} type="button" onClick={() => {
                 if (locked) {
