@@ -54,7 +54,7 @@ def test_overview_shape_and_values_for_teacher():
 
 
 def test_overview_active_now_consistency():
-    session = _login(TEACHER)
+    session = _login(TEACHER, "teacher")
     response = session.get("/teacher/overview")
     data = response.json()
     active_from_roster = sum(1 for x in data["students"] if x["active"])
