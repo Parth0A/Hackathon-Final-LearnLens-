@@ -576,7 +576,7 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading, selectedSubje
             {debuggerFeatures.map((item, index) => {
               const Icon = item.icon;
               const stepLabel = index < 4 ? String(index + 1).padStart(2, "0") : "CYCLE";
-              const stageOneCompleted = (() => { try { return localStorage.getItem(`learnlens-stage1-${studentId}`) === "completed"; } catch { return false; } })();
+              const stageOneCompleted = (() => { try { return localStorage.getItem(`learnlens-stage1-${user.student_id ?? ""}`) === "completed"; } catch { return false; } })();
               const stageTwoCompleted = stuckStageCompleted;
               const stageThreeCompleted = Boolean(dashboard?.recovered_count);
               const unlocked = Boolean(selectedSubject) && (
