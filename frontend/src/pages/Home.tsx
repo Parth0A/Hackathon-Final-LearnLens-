@@ -665,6 +665,8 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading, selectedSubje
       })}
     </div>
   </section>;
+}
+
 function StudentFeatureNotice({ feature, onClassroom }: { feature: string; onClassroom: () => void }) {
   return <Card data-testid="student-feature-role-notice" className="mx-auto mt-10 max-w-xl border-amber-200 bg-amber-50"><CardContent className="p-7"><Users size={23} className="text-amber-700" /><h1 className="mt-4 font-heading text-2xl font-bold text-slate-900">{feature} is a student workspace.</h1><p className="mt-2 leading-7 text-slate-600">Teacher permissions keep personal student learning data private. Open Classroom Radar to create links, publish questions, and review your roster.</p><Button data-testid="role-notice-classroom-button" className="mt-5" onClick={onClassroom}>Open Classroom Radar <ArrowRight size={16} /></Button></CardContent></Card>;
 }
