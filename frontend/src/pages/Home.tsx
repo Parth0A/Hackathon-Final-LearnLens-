@@ -97,7 +97,7 @@ export default function Home({ user }: { user: User }) {
 
   const submitAssessment = useMutation({
     mutationFn: () => apiPost<AssessmentResult>("/assessment/submit", { student_id: studentId, answers: assessment?.questions.map((question) => ({ question_id: question.id, selected_answer: assessmentAnswers[question.id] })) ?? [] }),
-    onSuccess: (data) => { setAssessmentResult(data); refreshData(); },
+    onSuccess: (data) => { setAssessmentResult(data); try { localStorage.setItem(`learnlens-stage1-${studentId}`, "completed"); } catch { /* storage unavailable */ } refreshData(); },
     onError: () => toast.error("Choose an answer for each question before submitting."),
   });
 
@@ -576,7 +576,7 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading, selectedSubje
             {debuggerFeatures.map((item, index) => {
               const Icon = item.icon;
               const stepLabel = index < 4 ? String(index + 1).padStart(2, "0") : "CYCLE";
-              const stageOneCompleted = Boolean(dashboard?.assessment_count);
+              const stageOneCompleted = (() => { try { return localStorage.getItem(`learnlens-stage1-${studentId}`) === "completed"; } catch { return false; } })();
               const stageTwoCompleted = stuckStageCompleted;
               const stageThreeCompleted = Boolean(dashboard?.recovered_count);
               const unlocked = Boolean(selectedSubject) && (
