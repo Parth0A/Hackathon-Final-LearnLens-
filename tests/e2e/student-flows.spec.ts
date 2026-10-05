@@ -43,6 +43,27 @@ test.describe('student flows', () => {
     await expect(masteryValue).toHaveText(/\d/ , { timeout: 20_000 });
   });
 
+  test('learning debugger locks later stages until the previous stage is completed', async ({ page }) => {
+    await page.evaluate(() => {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('learnlens-stage')) localStorage.removeItem(key);
+      }
+    });
+    await page.reload();
+    await page.getByTestId('hero-choose-subject-button').click();
+    await page.getByTestId('subject-data-structures').click();
+
+    const diagnosis = page.getByTestId('locked-feature-assessment');
+    const stuck = page.getByTestId('locked-feature-stuck');
+    const recovery = page.getByTestId('locked-feature-recovery');
+
+    await expect(diagnosis).toContainText('Unlocked');
+    await expect(stuck).toContainText('Locked');
+    await expect(recovery).toContainText('Locked');
+    await expect(stuck).toBeDisabled();
+    await expect(recovery).toBeDisabled();
+  });
+
   test('learning debugger runs the diagnostic stage end to end', async ({ page }) => {
     await page.getByTestId('available-feature-dashboard').click();
     await expect(page.getByTestId('student-dashboard')).toBeVisible();

@@ -66,6 +66,9 @@ export default function Home({ user }: { user: User }) {
   const [selectedSubject, setSelectedSubject] = useState<string>(() => {
     try { return localStorage.getItem(`learnlens-selected-subject-${studentId}`) ?? ""; } catch { return ""; }
   });
+  const [assessmentStageCompleted, setAssessmentStageCompleted] = useState<boolean>(() => {
+    try { return localStorage.getItem(`learnlens-stage1-${studentId}`) === "completed"; } catch { return false; }
+  });
   const [stuckStageCompleted, setStuckStageCompleted] = useState<boolean>(() => {
     try { return localStorage.getItem(`learnlens-stage2-${studentId}`) === "completed"; } catch { return false; }
   });
@@ -97,7 +100,12 @@ export default function Home({ user }: { user: User }) {
 
   const submitAssessment = useMutation({
     mutationFn: () => apiPost<AssessmentResult>("/assessment/submit", { student_id: studentId, answers: assessment?.questions.map((question) => ({ question_id: question.id, selected_answer: assessmentAnswers[question.id] })) ?? [] }),
-    onSuccess: (data) => { setAssessmentResult(data); try { localStorage.setItem(`learnlens-stage1-${studentId}`, "completed"); } catch { /* storage unavailable */ } refreshData(); },
+    onSuccess: (data) => {
+      setAssessmentResult(data);
+      setAssessmentStageCompleted(true);
+      try { localStorage.setItem(`learnlens-stage1-${studentId}`, "completed"); } catch { /* storage unavailable */ }
+      refreshData();
+    },
     onError: () => toast.error("Choose an answer for each question before submitting."),
   });
 
@@ -145,7 +153,21 @@ export default function Home({ user }: { user: User }) {
   const resetDemo = useMutation({
     mutationFn: () => apiPost<ResetResponse>("/demo/reset", {}),
     onSuccess: () => {
-      setView("dashboard"); setAssessment(null); setAssessmentResult(null); setIntervention(null); setRetest(null); setRetestResult(null); setPracticeResults({}); setPracticeCompleted(0); refreshData();
+      setView("dashboard");
+      setAssessment(null);
+      setAssessmentResult(null);
+      setIntervention(null);
+      setRetest(null);
+      setRetestResult(null);
+      setPracticeResults({});
+      setPracticeCompleted(0);
+      setAssessmentStageCompleted(false);
+      setStuckStageCompleted(false);
+      try {
+        localStorage.removeItem(`learnlens-stage1-${studentId}`);
+        localStorage.removeItem(`learnlens-stage2-${studentId}`);
+      } catch { /* storage unavailable */ }
+      refreshData();
     },
     onError: () => toast.error("Unable to reset the demo right now."),
   });
@@ -195,7 +217,7 @@ export default function Home({ user }: { user: User }) {
             </button>
           ) : null}
           {dataUnavailable ? <div data-testid="backend-error-state" className="mb-5 flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"><AlertTriangle size={18} /> Unable to connect to learning service. The workspace is still available; retry the page when the service returns.</div> : null}
-          {view === "home" ? <HomeLauncher user={user} onOpen={navigate} dashboard={dashboard} dashboardLoading={dashboardQuery.isLoading} selectedSubject={selectedSubject} setSelectedSubject={setSelectedSubject} stuckStageCompleted={stuckStageCompleted} /> : null}
+          {view === "home" ? <HomeLauncher user={user} onOpen={navigate} dashboard={dashboard} dashboardLoading={dashboardQuery.isLoading} selectedSubject={selectedSubject} setSelectedSubject={setSelectedSubject} assessmentStageCompleted={assessmentStageCompleted} stuckStageCompleted={stuckStageCompleted} /> : null}
           {studentOnlyView ? <StudentFeatureNotice feature={featureItems.find((item) => item.id === view)?.label ?? "This feature"} onClassroom={() => setView("classrooms")} /> : null}
           {user.role === "student" && view === "dashboard" ? <DashboardView dashboard={dashboard} gap={gap} studentId={studentId} onStartAssessment={() => navigate("assessment")} onStuck={() => navigate("stuck")} /> : null}
           {user.role === "student" && view === "assessment" ? <AssessmentView assessment={assessment} assessmentIndex={assessmentIndex} answers={assessmentAnswers} result={assessmentResult} loading={startAssessment.isPending || submitAssessment.isPending} onAnswer={(questionId, answer) => setAssessmentAnswers((current) => ({ ...current, [questionId]: answer }))} onPrevious={() => setAssessmentIndex((current) => Math.max(0, current - 1))} onNext={() => setAssessmentIndex((current) => Math.min((assessment?.questions.length ?? 1) - 1, current + 1))} onStart={() => startAssessment.mutate()} onDemoAnswers={() => setAssessmentAnswers(Object.fromEntries((assessment?.questions ?? []).map((question) => [question.id, question.options[0]])))} onSubmit={() => submitAssessment.mutate()} onReview={() => navigate("stuck")} /> : null}
@@ -486,7 +508,7 @@ function AdminView() {
   </section>;
 }
 
-function HomeLauncher({ user, onOpen, dashboard, dashboardLoading, selectedSubject, setSelectedSubject, stuckStageCompleted }: { user: User; onOpen: (view: View) => void; dashboard?: DashboardResponse; dashboardLoading?: boolean; selectedSubject: string; setSelectedSubject: (subject: string) => void; stuckStageCompleted: boolean }) {
+function HomeLauncher({ user, onOpen, dashboard, dashboardLoading, selectedSubject, setSelectedSubject, assessmentStageCompleted, stuckStageCompleted }: { user: User; onOpen: (view: View) => void; dashboard?: DashboardResponse; dashboardLoading?: boolean; selectedSubject: string; setSelectedSubject: (subject: string) => void; assessmentStageCompleted: boolean; stuckStageCompleted: boolean }) {
   const [subjectOpen, setSubjectOpen] = useState(false);
   const subjectsRef = useRef<HTMLDivElement | null>(null);
 
@@ -576,7 +598,7 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading, selectedSubje
             {debuggerFeatures.map((item, index) => {
               const Icon = item.icon;
               const stepLabel = index < 4 ? String(index + 1).padStart(2, "0") : "CYCLE";
-              const stageOneCompleted = (() => { try { return localStorage.getItem(`learnlens-stage1-${user.student_id ?? ""}`) === "completed"; } catch { return false; } })();
+              const stageOneCompleted = assessmentStageCompleted;
               const stageTwoCompleted = stuckStageCompleted;
               const stageThreeCompleted = Boolean(dashboard?.recovered_count);
               const unlocked = Boolean(selectedSubject) && (
