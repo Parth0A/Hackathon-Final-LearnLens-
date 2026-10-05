@@ -298,10 +298,12 @@ export default function Login() {
                         ))}
                       </div>
                     </div>
-                    <div>
-                      <label htmlFor="teacher-verification-code" className="mb-2 block text-sm font-semibold text-slate-800">Teacher verification code</label>
-                      <input id="teacher-verification-code" data-testid="teacher-verification-code-input" type="password" autoComplete="off" className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" value={teacherVerificationCode} onChange={(event) => setTeacherVerificationCode(event.target.value)} placeholder="Enter verification code" required />
-                    </div>
+                    {mode === "register" ? (
+                      <div>
+                        <label htmlFor="teacher-verification-code" className="mb-2 block text-sm font-semibold text-slate-800">Teacher verification code</label>
+                        <input id="teacher-verification-code" data-testid="teacher-verification-code-input" type="password" autoComplete="off" className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" value={teacherVerificationCode} onChange={(event) => setTeacherVerificationCode(event.target.value)} placeholder="Enter verification code" required />
+                      </div>
+                    ) : null}
                     <div>
                       <label htmlFor="teacher-institute" className="mb-2 block text-sm font-semibold text-slate-800">Institute</label>
                       <input id="teacher-institute" data-testid="teacher-institute-input" className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" value={teacherInstitute} onChange={(event) => setTeacherInstitute(event.target.value)} placeholder="School, college or university" />
