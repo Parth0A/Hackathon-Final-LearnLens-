@@ -66,6 +66,9 @@ export default function Home({ user }: { user: User }) {
   const [selectedSubject, setSelectedSubject] = useState<string>(() => {
     try { return localStorage.getItem(`learnlens-selected-subject-${studentId}`) ?? ""; } catch { return ""; }
   });
+  const [assessmentStageCompleted, setAssessmentStageCompleted] = useState<boolean>(() => {
+    try { return localStorage.getItem(`learnlens-stage1-${studentId}`) === "completed"; } catch { return false; }
+  });
   const [stuckStageCompleted, setStuckStageCompleted] = useState<boolean>(() => {
     try { return localStorage.getItem(`learnlens-stage2-${studentId}`) === "completed"; } catch { return false; }
   });
@@ -97,7 +100,12 @@ export default function Home({ user }: { user: User }) {
 
   const submitAssessment = useMutation({
     mutationFn: () => apiPost<AssessmentResult>("/assessment/submit", { student_id: studentId, answers: assessment?.questions.map((question) => ({ question_id: question.id, selected_answer: assessmentAnswers[question.id] })) ?? [] }),
-    onSuccess: (data) => { setAssessmentResult(data); try { localStorage.setItem(`learnlens-stage1-${studentId}`, "completed"); } catch { /* storage unavailable */ } refreshData(); },
+    onSuccess: (data) => {
+      setAssessmentResult(data);
+      setAssessmentStageCompleted(true);
+      try { localStorage.setItem(`learnlens-stage1-${studentId}`, "completed"); } catch { /* storage unavailable */ }
+      refreshData();
+    },
     onError: () => toast.error("Choose an answer for each question before submitting."),
   });
 
@@ -145,7 +153,21 @@ export default function Home({ user }: { user: User }) {
   const resetDemo = useMutation({
     mutationFn: () => apiPost<ResetResponse>("/demo/reset", {}),
     onSuccess: () => {
-      setView("dashboard"); setAssessment(null); setAssessmentResult(null); setIntervention(null); setRetest(null); setRetestResult(null); setPracticeResults({}); setPracticeCompleted(0); refreshData();
+      setView("dashboard");
+      setAssessment(null);
+      setAssessmentResult(null);
+      setIntervention(null);
+      setRetest(null);
+      setRetestResult(null);
+      setPracticeResults({});
+      setPracticeCompleted(0);
+      setAssessmentStageCompleted(false);
+      setStuckStageCompleted(false);
+      try {
+        localStorage.removeItem(`learnlens-stage1-${studentId}`);
+        localStorage.removeItem(`learnlens-stage2-${studentId}`);
+      } catch { /* storage unavailable */ }
+      refreshData();
     },
     onError: () => toast.error("Unable to reset the demo right now."),
   });
@@ -576,7 +598,7 @@ function HomeLauncher({ user, onOpen, dashboard, dashboardLoading, selectedSubje
             {debuggerFeatures.map((item, index) => {
               const Icon = item.icon;
               const stepLabel = index < 4 ? String(index + 1).padStart(2, "0") : "CYCLE";
-              const stageOneCompleted = (() => { try { return localStorage.getItem(`learnlens-stage1-${user.student_id ?? ""}`) === "completed"; } catch { return false; } })();
+              const stageOneCompleted = assessmentStageCompleted;
               const stageTwoCompleted = stuckStageCompleted;
               const stageThreeCompleted = Boolean(dashboard?.recovered_count);
               const unlocked = Boolean(selectedSubject) && (
