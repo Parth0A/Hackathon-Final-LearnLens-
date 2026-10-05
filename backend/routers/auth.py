@@ -1,5 +1,4 @@
 import os
-import hmac
 import hashlib
 import secrets
 from datetime import datetime, timezone
@@ -61,10 +60,6 @@ async def register(payload: RegisterRequest, request: Request, response: Respons
     email = payload.email.lower()
     if await db.users.find_one({"email": email}):
         raise HTTPException(status_code=409, detail="An account already exists for this email")
-    if payload.role == "teacher" and not payload.teacher_verification_code:
-        raise HTTPException(status_code=403, detail="A valid teacher verification code is required")
-    if payload.role == "teacher" and not hmac.compare_digest(payload.teacher_verification_code or "", os.environ.get("TEACHER_VERIFICATION_CODE", "")):
-        raise HTTPException(status_code=403, detail="A valid teacher verification code is required")
     user_id = str(uuid4())
     student_id = user_id if payload.role == "student" else None
     user = {
@@ -95,6 +90,8 @@ async def login(payload: LoginRequest, request: Request, response: Response) -> 
     stored_hash = user.get("password_hash", "") if user else ""
     if not user or not verify_password(payload.password, stored_hash):
         raise HTTPException(status_code=401, detail="Email or password is incorrect")
+    if user.get("role") != payload.role:
+        raise HTTPException(status_code=403, detail=f"This account is registered as a {user.get('role', 'user')}. Sign in using the {user.get('role', 'user')} option.")
     if password_needs_rehash(stored_hash):
         await db.users.update_one({"id": user["id"]}, {"$set": {"password_hash": hash_password(payload.password), "updated_at": now_iso()}})
     await _clear_rate_limit(key)
