@@ -217,7 +217,7 @@ export default function Home({ user }: { user: User }) {
             </button>
           ) : null}
           {dataUnavailable ? <div data-testid="backend-error-state" className="mb-5 flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"><AlertTriangle size={18} /> Unable to connect to learning service. The workspace is still available; retry the page when the service returns.</div> : null}
-          {view === "home" ? <HomeLauncher user={user} onOpen={navigate} dashboard={dashboard} dashboardLoading={dashboardQuery.isLoading} selectedSubject={selectedSubject} setSelectedSubject={setSelectedSubject} stuckStageCompleted={stuckStageCompleted} /> : null}
+          {view === "home" ? <HomeLauncher user={user} onOpen={navigate} dashboard={dashboard} dashboardLoading={dashboardQuery.isLoading} selectedSubject={selectedSubject} setSelectedSubject={setSelectedSubject} assessmentStageCompleted={assessmentStageCompleted} stuckStageCompleted={stuckStageCompleted} /> : null}
           {studentOnlyView ? <StudentFeatureNotice feature={featureItems.find((item) => item.id === view)?.label ?? "This feature"} onClassroom={() => setView("classrooms")} /> : null}
           {user.role === "student" && view === "dashboard" ? <DashboardView dashboard={dashboard} gap={gap} studentId={studentId} onStartAssessment={() => navigate("assessment")} onStuck={() => navigate("stuck")} /> : null}
           {user.role === "student" && view === "assessment" ? <AssessmentView assessment={assessment} assessmentIndex={assessmentIndex} answers={assessmentAnswers} result={assessmentResult} loading={startAssessment.isPending || submitAssessment.isPending} onAnswer={(questionId, answer) => setAssessmentAnswers((current) => ({ ...current, [questionId]: answer }))} onPrevious={() => setAssessmentIndex((current) => Math.max(0, current - 1))} onNext={() => setAssessmentIndex((current) => Math.min((assessment?.questions.length ?? 1) - 1, current + 1))} onStart={() => startAssessment.mutate()} onDemoAnswers={() => setAssessmentAnswers(Object.fromEntries((assessment?.questions ?? []).map((question) => [question.id, question.options[0]])))} onSubmit={() => submitAssessment.mutate()} onReview={() => navigate("stuck")} /> : null}
@@ -508,7 +508,7 @@ function AdminView() {
   </section>;
 }
 
-function HomeLauncher({ user, onOpen, dashboard, dashboardLoading, selectedSubject, setSelectedSubject, stuckStageCompleted }: { user: User; onOpen: (view: View) => void; dashboard?: DashboardResponse; dashboardLoading?: boolean; selectedSubject: string; setSelectedSubject: (subject: string) => void; stuckStageCompleted: boolean }) {
+function HomeLauncher({ user, onOpen, dashboard, dashboardLoading, selectedSubject, setSelectedSubject, assessmentStageCompleted, stuckStageCompleted }: { user: User; onOpen: (view: View) => void; dashboard?: DashboardResponse; dashboardLoading?: boolean; selectedSubject: string; setSelectedSubject: (subject: string) => void; assessmentStageCompleted: boolean; stuckStageCompleted: boolean }) {
   const [subjectOpen, setSubjectOpen] = useState(false);
   const subjectsRef = useRef<HTMLDivElement | null>(null);
 
