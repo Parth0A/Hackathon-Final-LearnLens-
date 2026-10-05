@@ -372,7 +372,6 @@ function SchedulePlannerView({ user }: { user: User }) {
   const [session, setSession] = useState<AssessmentSession | null>(null);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const answersRef = useRef<Record<string, string>>({});
   const [result, setResult] = useState<AssessmentResult | null>(null);
   const [minutes, setMinutes] = useState("120");
   const [error, setError] = useState("");
@@ -382,20 +381,20 @@ function SchedulePlannerView({ user }: { user: User }) {
     if (!studentId) return;
     setLoading(true);
     apiPost<AssessmentSession>("/assessment/start", { student_id: studentId })
-      .then((data) => { setSession(data); const initialAnswers = Object.fromEntries(data.questions.map((q) => [q.id, ""])); setAnswers(initialAnswers); answersRef.current = initialAnswers; })
+      .then((data) => { setSession(data); setAnswers(Object.fromEntries(data.questions.map((q) => [q.id, ""]))); })
       .catch(() => setError("Unable to start the learning diagnosis."))
       .finally(() => setLoading(false));
   }, [studentId]);
 
   const current = session?.questions[index];
-  const allAnswered = Boolean(session?.questions.length && session.questions.every((q) => answersRef.current[q.id]));
+  const allAnswered = Boolean(session?.questions.length && session.questions.every((q) => answers[q.id]));
   const submitDiagnosis = async () => {
     if (!session || !allAnswered) return;
     setLoading(true); setError("");
     try {
       const data = await apiPost<AssessmentResult>("/assessment/submit", {
         student_id: studentId,
-        answers: session.questions.map((q) => ({ question_id: q.id, selected_answer: answersRef.current[q.id] })),
+        answers: session.questions.map((q) => ({ question_id: q.id, selected_answer: answers[q.id] })),
       });
       setResult(data); setStep("result");
     } catch { setError("We could not save the diagnosis. Please try again."); }
@@ -423,7 +422,7 @@ function SchedulePlannerView({ user }: { user: User }) {
       <CardContent className="space-y-5">
         {loading && !session ? <p className="text-sm text-slate-500">Preparing your questions…</p> : current ? <>
           <p className="text-lg font-medium leading-8 text-slate-900">{current.text}</p>
-          <div className="grid gap-2">{current.options.map((option) => <button type="button" key={option} onClick={() => { const next = { ...answersRef.current, [current.id]: option }; answersRef.current = next; setAnswers(next); }} className={`rounded-xl border p-4 text-left text-sm transition ${answers[current.id] === option ? "border-blue-500 bg-blue-50 text-blue-800" : "border-slate-200 bg-white hover:border-blue-200"}`}>{option}</button>)}</div>
+          <div className="grid gap-2">{current.options.map((option) => <button type="button" key={option} onClick={() => setAnswers((a) => ({ ...a, [current.id]: option }))} className={`rounded-xl border p-4 text-left text-sm transition ${answers[current.id] === option ? "border-blue-500 bg-blue-50 text-blue-800" : "border-slate-200 bg-white hover:border-blue-200"}`}>{option}</button>)}</div>
           <div className="flex flex-wrap justify-between gap-2 pt-2"><Button variant="outline" disabled={index === 0} onClick={() => setIndex((i) => i - 1)}>Previous</Button>{index < session.questions.length - 1 ? <Button disabled={!answers[current.id]} onClick={() => setIndex((i) => i + 1)}>Next <ArrowRight size={15} /></Button> : <Button disabled={!allAnswered || loading} onClick={submitDiagnosis}>Find my learning gap <SearchCheck size={15} /></Button>}</div>
         </> : null}
         {error ? <p className="text-sm text-rose-600">{error}</p> : null}
