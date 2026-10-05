@@ -70,6 +70,7 @@ export default function Login() {
   const [academicSelection, setAcademicSelection] = useState("");
   const [teacherDesignation, setTeacherDesignation] = useState("Professor");
   const [teacherInstitute, setTeacherInstitute] = useState("");
+  const [teacherVerificationCode, setTeacherVerificationCode] = useState("");
 
   const auth = useMutation({
     mutationFn: () =>
@@ -83,6 +84,7 @@ export default function Login() {
             name,
             role,
             class_name: role === "teacher" ? [teacherDesignation, teacherInstitute.trim()].filter(Boolean).join(" · ") || null : className || academicSelection || null,
+            teacher_verification_code: role === "teacher" ? teacherVerificationCode : undefined,
           }),
     onSuccess: (data) => { if (authPanel === "admin" && adminStep === "request") { setAdminStep("verify"); auth.reset(); return; } beginSession((data as AuthResponse).user); },
   });
@@ -284,7 +286,7 @@ export default function Login() {
                   <div className="space-y-3">
                     <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-4">
                       <div className="text-sm font-semibold text-slate-900">Professional educator access</div>
-                      <p className="mt-1 text-xs leading-5 text-slate-500">Use your institutional role and institute context. Teacher verification is temporarily not required for this demo.</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">Use your institutional role and institute context. Teacher registration requires the demo verification code.</p>
                     </div>
                     <div>
                       <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Professional role</label>
@@ -296,6 +298,12 @@ export default function Login() {
                         ))}
                       </div>
                     </div>
+                    {mode === "register" ? (
+                      <div>
+                        <label htmlFor="teacher-verification-code" className="mb-2 block text-sm font-semibold text-slate-800">Teacher verification code</label>
+                        <input id="teacher-verification-code" data-testid="teacher-verification-code-input" type="password" autoComplete="off" className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" value={teacherVerificationCode} onChange={(event) => setTeacherVerificationCode(event.target.value)} placeholder="Enter verification code" required />
+                      </div>
+                    ) : null}
                     <div>
                       <label htmlFor="teacher-institute" className="mb-2 block text-sm font-semibold text-slate-800">Institute</label>
                       <input id="teacher-institute" data-testid="teacher-institute-input" className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10" value={teacherInstitute} onChange={(event) => setTeacherInstitute(event.target.value)} placeholder="School, college or university" />
