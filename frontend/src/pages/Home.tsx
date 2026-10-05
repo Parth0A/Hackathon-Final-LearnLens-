@@ -387,7 +387,7 @@ function SchedulePlannerView({ user }: { user: User }) {
   }, [studentId]);
 
   const current = session?.questions[index];
-  const allAnswered = Boolean(session?.questions.length && session.questions.every((q) => answers[q.id]));
+  const allAnswered = Boolean(session?.questions.length && index === session.questions.length - 1 && current && answers[current.id]);
   const submitDiagnosis = async () => {
     if (!session || !allAnswered) return;
     setLoading(true); setError("");
