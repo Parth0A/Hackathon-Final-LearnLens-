@@ -64,7 +64,6 @@ export default function Login() {
   const [name, setName] = useState("");
   const [role, setRole] = useState<Role>("student");
   const [className, setClassName] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
   const [adminCode, setAdminCode] = useState("");
   const [educationType, setEducationType] = useState<"school" | "college">("college");
   const [demoBranch, setDemoBranch] = useState("Computer Science & Engineering");
@@ -84,7 +83,6 @@ export default function Login() {
             name,
             role,
             class_name: role === "teacher" ? [teacherDesignation, teacherInstitute.trim()].filter(Boolean).join(" · ") || null : className || academicSelection || null,
-            teacher_verification_code: role === "teacher" ? verificationCode : null,
           }),
     onSuccess: (data) => { if (authPanel === "admin" && adminStep === "request") { setAdminStep("verify"); auth.reset(); return; } beginSession((data as AuthResponse).user); },
   });
@@ -286,7 +284,7 @@ export default function Login() {
                   <div className="space-y-3">
                     <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-4">
                       <div className="text-sm font-semibold text-slate-900">Professional educator access</div>
-                      <p className="mt-1 text-xs leading-5 text-slate-500">Use your institutional role and institute context. LearnLens keeps the teacher experience focused on classroom learning evidence.</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">Use your institutional role and institute context. Teacher verification is temporarily not required for this demo.</p>
                     </div>
                     <div>
                       <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Professional role</label>
@@ -389,22 +387,6 @@ export default function Login() {
                       </div>
                     ) : null}
 
-                    {role === "teacher" ? (
-                      <div>
-                        <label htmlFor="teacher-code" className="mb-2 block text-sm font-semibold text-slate-800">
-                          Teacher verification code
-                        </label>
-                        <input
-                          id="teacher-code"
-                          data-testid="teacher-verification-input"
-                          className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-4 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-                          value={verificationCode}
-                          onChange={(event) => setVerificationCode(event.target.value)}
-                          placeholder="Enter verification code"
-                          required
-                        />
-                      </div>
-                    ) : null}
                   </>
                 )}
 
