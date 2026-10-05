@@ -60,6 +60,13 @@ async def register(payload: RegisterRequest, request: Request, response: Respons
     email = payload.email.lower()
     if await db.users.find_one({"email": email}):
         raise HTTPException(status_code=409, detail="An account already exists for this email")
+    if payload.role == "teacher":
+        expected_code = os.environ.get("TEACHER_VERIFICATION_CODE", "").strip()
+        supplied_code = (payload.teacher_verification_code or "").strip()
+        if not expected_code:
+            raise HTTPException(status_code=503, detail="Teacher verification is not configured")
+        if not supplied_code or not secrets.compare_digest(supplied_code, expected_code):
+            raise HTTPException(status_code=403, detail="Invalid teacher verification code")
     user_id = str(uuid4())
     student_id = user_id if payload.role == "student" else None
     user = {
