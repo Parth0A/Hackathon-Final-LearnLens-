@@ -44,6 +44,12 @@ test.describe('student flows', () => {
   });
 
   test('learning debugger locks later stages until the previous stage is completed', async ({ page }) => {
+    await page.evaluate(() => {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('learnlens-stage')) localStorage.removeItem(key);
+      }
+    });
+    await page.reload();
     await page.getByTestId('hero-choose-subject-button').click();
     await page.getByTestId('subject-data-structures').click();
 
@@ -54,9 +60,8 @@ test.describe('student flows', () => {
     await expect(diagnosis).toContainText('Unlocked');
     await expect(stuck).toContainText('Locked');
     await expect(recovery).toContainText('Locked');
-
-    await stuck.click();
-    await expect(page.getByText('Complete the previous stage first')).toBeVisible();
+    await expect(stuck).toBeDisabled();
+    await expect(recovery).toBeDisabled();
   });
 
   test('learning debugger runs the diagnostic stage end to end', async ({ page }) => {
